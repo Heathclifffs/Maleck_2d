@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/riale.gd" id="1_6bcvd"]
+
+[sub_resource type="RectangleShape2D" id="1_lgikf"]
+size = Vector2(48, 24)
+
+[node name="Riale" type="CharacterBody2D"]
+script = ExtResource("1_6bcvd")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture_filter = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1_lgikf")
+position = Vector2(0, 24)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+enabled = true
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
