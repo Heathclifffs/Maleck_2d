@@ -31,7 +31,7 @@
 ### Phase 2 — Core Gameplay
 - [x] Système de santé (cœurs à la Zelda, max_hp=10)
 - [x] Stamina (course)
-- [ ] Combat idle (état COMBAT, toggle, animations 8 dir)
+- [x] Combat idle (état COMBAT, Tab toggle, sprint auto-activation, timeout 3s, animations 8 dir, 29 frames, 20 FPS, tailles run)
 - [ ] Attaques (light attack 1/2/3, hitbox, dégâts)
 - [ ] Inventaire + items (Resources Godot)
 - [ ] Ramassage d'objets (ramassable générique)
@@ -69,7 +69,7 @@
 ## Stack Technique
 - **Moteur** : Godot Engine 4.x (GDScript)
 - **Art** : Pixel art isométrique 2D (NEAREST filtering, 768×448 frames)
-- **Taille perso** : ~239px de haut (idle/walk), ~205px (run), 35 px/s marche
+- **Taille perso** : cardinaux 239/idle-walk, 205/run, 205/combat-idle ; diagonaux 215/walk, 185/run, 185/combat-idle ; up 235/run
 - **Langage** : GDScript (scripts), Python (preprocessing spritesheets)
 - **Dépendances** : Pillow, numpy
 
@@ -100,6 +100,7 @@
 - `scenes/stamina_bar.gd` + `.tscn` — barre stamina HUD
 - `art/riale/walk/` — spritesheets walk (3072×3584, 28 frames, 8 rows)
 - `art/riale/run/` — spritesheets run (3072×3584, 29 frames, 8 rows)
+- `art/riale/combat_idle/` — spritesheets combat idle (3072×3584, 29 frames, 8 rows)
 - `art/riale/idle/` — spritesheets idle (768×...)
 - `riale-game-skills.md` — ce fichier (vision + roadmap)
 

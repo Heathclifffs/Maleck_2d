@@ -14,14 +14,14 @@ CELL_H = 448
 OUTPUT_ROWS = 8
 
 TARGET_H_MAP = {
-    "down":       239,
-    "up":         239,
-    "right":      239,
-    "left":       239,
-    "down_right": 215,
-    "down_left":  215,
-    "up_right":   215,
-    "up_left":    215,
+    "down":       205,
+    "up":         235,
+    "right":      205,
+    "left":       205,
+    "down_right": 185,
+    "down_left":  185,
+    "up_right":   200,
+    "up_left":    200,
 }
 
 SOURCES = {
