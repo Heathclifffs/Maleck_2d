@@ -34,42 +34,60 @@
 - [x] Éclairage 2D directionnel (DirectionalLight2D, 135°, energy=1.8)
 - [x] Post-processing : WorldEnvironment (ACES tonemap + glow bloom)
 
-### Phase 2 — Core Gameplay
+### Phase 2 — Rendu 2.5D & Polish Visuel
+- [x] Shader PBR (pseudo-normal + outline) sur Riale + Ouda
+- [x] Éclairage directionnel 2D (DirectionalLight2D)
+- [x] WorldEnvironment (ACES tonemap + glow bloom)
+- [ ] Ombres portées (LightOccluder2D) sur persos + tilemap
+- [ ] Rim light dans le shader (highlight bordure côté lumière)
+- [ ] PointLight2D dynamique (torche, aura, magie)
+- [ ] Particules d'ambiance (poussière, feuilles, lucioles, pluie)
+- [ ] Color grading custom (LUT) pour palette stylisée unique
+- [ ] Vignette dynamique (s'intensifie en combat / basse vie)
+- [ ] Chromatic aberration sur actions (coups, magie)
+
+### Phase 3 — Tilemap & Environnement
+- [ ] Tilemap isométrique avec hauteurs + Z-index auto
+- [ ] Biomes variés (plaine, forêt, désert, montagne, lac, donjon)
+- [ ] Collisions + occlusions sur le tilemap
+- [ ] LightOccluder2D sur le terrain pour ombres portées
+- [ ] Parallax multi-plan (fond lointain, medium, premier plan)
+
+### Phase 4 — Core Gameplay
 - [x] Système de santé (cœurs à la Zelda, max_hp=10)
 - [x] Stamina (course)
-- [x] Combat idle (état COMBAT, Tab toggle, sprint auto-activation, timeout 3s, animations 8 dir, 29 frames, 20 FPS, tailles run)
+- [x] Combat idle (état COMBAT, Tab toggle, sprint auto-activation, timeout 3s)
 - [ ] Attaques (light attack 1/2/3, hitbox, dégâts)
+- [ ] Run + combat idle pour Ouda
 - [ ] Inventaire + items (Resources Godot)
 - [ ] Ramassage d'objets (ramassable générique)
 - [ ] Armes qui se cassent (durabilité)
 - [ ] Cuisine / élixirs (craft)
 
-### Phase 3 — Combat avancé
+### Phase 5 — Combat avancé
 - [ ] Esquive / roulade
 - [ ] Parade / contre
 - [ ] Arc / projectiles
 - [ ] Ennemis basiques (IA, patrouille, aggro)
 - [ ] Boss (pattern, phases)
 
-### Phase 4 — Survie & Exploration
-- [ ] Cycle jour/nuit
-- [ ] Météo (pluie, orage, tempête)
+### Phase 6 — Survie & Exploration
+- [ ] Cycle jour/nuit (lumière directionnelle dynamique)
+- [ ] Météo (pluie, orage, tempête → particules + audio)
 - [ ] Température (froid, chaleur → vêtements, élixirs)
 - [ ] Faim / endurance
 - [ ] Carte du monde (minimap + carte complète)
-
-### Phase 5 — Monde & Environnement
-- [ ] Tilemap isométrique (terrains, hauteurs)
-- [ ] Biomes (plaine, forêt, désert, montagne, lac)
-- [ ] Donjons / sanctuaires / grottes
 - [ ] Points de téléportation (tours / feux de camp)
-- [ ] PNJ / quêtes minimales
 
-### Phase 6 — Polish
+### Phase 7 — Monde & Narration
+- [ ] PNJ / quêtes minimales
+- [ ] Dialogues
+- [ ] Donjons / sanctuaires / grottes procéduraux
+- [ ] Boss et arènes
+
+### Phase 8 — Polish Final
 - [ ] Sons / musique (ambiance, combat, exploration)
-- [ ] Particles (pluie, neige, feu, magie)
 - [ ] Écran-titre, menus, game over
-- [ ] Dialogues / cinématiques minimales
 - [ ] Optimisation, tests, équilibrage
 
 ## Stack Technique
