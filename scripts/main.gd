@@ -14,10 +14,11 @@ func _ready():
 
 func _process(_delta: float):
     var dir_name: String = riale.direction.capitalize().replace("_", " ")
-    var state_names := {0: "Idle", 1: "Walk", 2: "Run"}
+    var state_names := {0: "Idle", 1: "Walk", 2: "Run", 3: "Combat"}
     var state_name: String = state_names.get(riale.state, "?")
     var sprint_tag := " [SPRINT]" if riale.is_sprinting else ""
-    info.text = state_name + " " + dir_name + sprint_tag + hp_text + stamina_text
+    var combat_tag := " [⚔]" if riale.combat_mode else ""
+    info.text = state_name + " " + dir_name + sprint_tag + combat_tag + hp_text + stamina_text
 
     if Input.is_action_just_pressed("ui_accept"):
         riale.get_node("Health").take_damage(1)
