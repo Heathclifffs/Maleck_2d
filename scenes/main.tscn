@@ -1,15 +1,19 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_fx02y"]
 [ext_resource type="PackedScene" path="res://scenes/riale.tscn" id="2_hddmh"]
 [ext_resource type="PackedScene" path="res://scenes/heart_display.tscn" id="3_heart"]
 [ext_resource type="PackedScene" path="res://scenes/stamina_bar.tscn" id="4_stbar"]
+[ext_resource type="PackedScene" path="res://scenes/ouda.tscn" id="5_ouda"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_fx02y")
 
 [node name="Riale" parent="." instance=ExtResource("2_hddmh")]
-position = Vector2(512, 400)
+position = Vector2(400, 400)
+
+[node name="Ouda" parent="." instance=ExtResource("5_ouda")]
+position = Vector2(624, 400)
 
 [node name="HeartDisplay" parent="." instance=ExtResource("3_heart")]
 
@@ -28,4 +32,4 @@ offset_bottom = 60.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
-text = "ZQSD/WASD/Arrows pour marcher | Shift=courir | Espace=degat | E=soin"
+text = "ZQSD/WASD/Arrows | Shift=sprint | Tab=combat | Espace=degat | E=soin"
