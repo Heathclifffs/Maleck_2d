@@ -1,9 +1,13 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ouda.gd" id="1_ouda"]
+[ext_resource type="Shader" path="res://shaders/riale_pbr.gdshader" id="2_shader"]
 
 [sub_resource type="RectangleShape2D" id="1_collision"]
 size = Vector2(48, 24)
+
+[sub_resource type="ShaderMaterial" id="2_mat"]
+shader = ExtResource("2_shader")
 
 [node name="Ouda" type="CharacterBody2D"]
 script = ExtResource("1_ouda")
@@ -11,6 +15,7 @@ script = ExtResource("1_ouda")
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.75, 0.75)
 texture_filter = 0
+material = SubResource("2_mat")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("1_collision")

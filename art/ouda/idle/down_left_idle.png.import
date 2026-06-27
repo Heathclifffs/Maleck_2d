@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d2u2ruqhr2tqo"
-valid=false
+uid="uid://bvlb1551f4qsa"
+path="res://.godot/imported/down_left_idle.png-f2a43e6a2ec24a637d7a5e533a7ffb95.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://art/ouda/idle/down_left_idle.png"
+dest_files=["res://.godot/imported/down_left_idle.png-f2a43e6a2ec24a637d7a5e533a7ffb95.ctex"]
 
 [params]
 

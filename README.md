@@ -4,9 +4,10 @@ Jeu d'action-aventure isométrique pixel art dans l'esprit de Zelda: BotW avec d
 
 ## Stack
 
-- **Moteur** : Godot 4.x (GDScript)
+- **Moteur** : Godot 4.x (GDScript, shaders GLSL)
 - **Art** : Pixel art isométrique, spritesheets 768×448 cells, NEAREST filtering
 - **Preprocessing** : Python (Pillow, numpy) — bbox extraction, unified crop, mirroring, scaling
+- **Rendu 2.5D** : Shader canvas_item (pseudo-normal maps from alpha + outline detect), éclairage 2D directionnel, WorldEnvironment (ACES tonemap + glow bloom)
 
 ## Animations
 
@@ -19,16 +20,24 @@ Jeu d'action-aventure isométrique pixel art dans l'esprit de Zelda: BotW avec d
 | Idle | Ouda | 8 | 29 | 20 | 239px | 239px |
 | Walk | Ouda | 8 | 29 | 24 | 239px | 215px |
 
+## Rendu 2.5D
+
+- **Shader PBR** sur Riale + Ouda : pseudo-normales calculées depuis l'alpha du sprite + outline noir 8-voisins
+- **Éclairage directionnel** : DirectionalLight2D (135°, energy=1.8)
+- **Post-processing** : WorldEnvironment avec ACES tonemap + glow bloom
+
 ## Contrôles
 
 - ZQSD / WASD / Flèches — déplacement
 - Shift — sprint (consomme stamina)
-- Tab — toggle mode combat
+- Tab — toggle mode combat (Riale)
 
 ## Structure
 
 ```
 game/
+├── shaders/                # Shaders GLSL canvas_item
+│   └── riale_pbr.gdshader  # Pseudo-normal maps + outline (Riale + Ouda)
 ├── scripts/                # GDScript + preprocessing Python
 │   ├── riale.gd            # Riale (états, animations, combat)
 │   ├── ouda.gd             # Ouda (états, animations)
