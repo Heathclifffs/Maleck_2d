@@ -6,8 +6,23 @@
 [ext_resource type="PackedScene" path="res://scenes/stamina_bar.tscn" id="4_stbar"]
 [ext_resource type="PackedScene" path="res://scenes/ouda.tscn" id="5_ouda"]
 
+[sub_resource type="Environment" id="1_env"]
+glow_enabled = true
+glow_intensity = 0.3
+glow_bloom = 0.05
+glow_blend_mode = 1
+tonemap_mode = 3
+tonemap_exposure = 1.1
+
 [node name="Main" type="Node2D"]
 script = ExtResource("1_fx02y")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("1_env")
+
+[node name="SunLight" type="DirectionalLight2D" parent="."]
+energy = 1.8
+rotation = 2.356
 
 [node name="Riale" parent="." instance=ExtResource("2_hddmh")]
 position = Vector2(400, 400)
@@ -32,4 +47,4 @@ offset_bottom = 60.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
-text = "ZQSD/WASD/Arrows | Shift=sprint | Tab=combat | Espace=degat | E=soin"
+text = "ZQSD/WASD/Arrows | Shift=sprint | Tab=combat | Espace=degat | E=soin  | Riale shader PBR (glow+ACES)"
