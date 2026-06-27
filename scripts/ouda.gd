@@ -38,6 +38,7 @@ func _ready():
 	_setup_input()
 	_build_all_animations()
 	sprite.play("idle_" + direction)
+	_update_sprite_offset()
 
 
 func _setup_input():
@@ -125,8 +126,16 @@ func _physics_process(delta: float):
 			velocity = Vector2.ZERO
 
 
+func _update_sprite_offset():
+	match state:
+		State.IDLE:
+			sprite.position.y = -88
+		State.WALK:
+			sprite.position.y = -86
+
 func _change_to(new_state: State):
 	state = new_state
+	_update_sprite_offset()
 	var prefix := "idle_"
 	match state:
 		State.WALK: prefix = "walk_"

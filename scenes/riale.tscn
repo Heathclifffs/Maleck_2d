@@ -21,7 +21,7 @@ material = SubResource("2_mat")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("1_lgikf")
-position = Vector2(0, 24)
+position = Vector2(0, 12)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 enabled = true

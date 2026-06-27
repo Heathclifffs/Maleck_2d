@@ -8,11 +8,11 @@
 
 [sub_resource type="Environment" id="1_env"]
 glow_enabled = true
-glow_intensity = 0.3
+glow_intensity = 0.15
 glow_bloom = 0.05
 glow_blend_mode = 1
-tonemap_mode = 3
-tonemap_exposure = 1.1
+tonemap_mode = 2
+tonemap_exposure = 1.0
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_fx02y")
@@ -21,8 +21,12 @@ script = ExtResource("1_fx02y")
 environment = SubResource("1_env")
 
 [node name="SunLight" type="DirectionalLight2D" parent="."]
-energy = 1.8
+energy = 0.7
 rotation = 2.356
+
+[node name="FillLight" type="DirectionalLight2D" parent="."]
+energy = 0.25
+rotation = 5.498
 
 [node name="Riale" parent="." instance=ExtResource("2_hddmh")]
 position = Vector2(400, 400)
