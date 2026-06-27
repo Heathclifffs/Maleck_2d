@@ -24,6 +24,11 @@ import sys
 WALK_SRC = "/home/yipene/Documents/Projects/artworks/Maleck/Riale/anim/Walk"
 WALK_DST = "/home/yipene/Documents/Projects/artworks/Maleck/game/art/riale/walk"
 TARGET_H = 239
+WALK_TARGET_H = {
+    "down": 239, "down_left": 215, "down_right": 215,
+    "up": 239, "up_left": 215, "up_right": 215,
+    "left": 239, "right": 239,
+}
 TARGET_FEET_Y = 344
 CELL_W = 768
 
@@ -183,7 +188,7 @@ def extract_grid_frames(img, rows, cell_h):
                 top2 = bands[:2]
                 top2.sort(key=lambda b: b[0])
                 gap = top2[1][0] - top2[0][1]
-                if gap <= 200:
+                if gap <= 230:
                     frames.append(composite_bands(cell_arr, top2))
                 else:
                     y0, y1, _ = top2[0]
@@ -204,12 +209,12 @@ def extract_bbox_frames(img, bbox_data, cell_h, rows):
     return extract_grid_frames(img, rows, cell_h)
 
 
-def process_frame(frame_img):
-    """Scale a frame image to target height (239px) and place in 768×448 with feet at 344."""
+def process_frame(frame_img, target_h=TARGET_H):
+    """Scale a frame image to target height and place in 768×448 with feet at 344."""
     w, h = frame_img.size
-    scale = TARGET_H / h
+    scale = target_h / h
     new_w = max(1, round(w * scale))
-    new_h = TARGET_H
+    new_h = target_h
     scaled = frame_img.resize((new_w, new_h), Image.NEAREST)
 
     canvas = Image.new("RGBA", (CELL_W, 448), (0, 0, 0, 0))
@@ -219,13 +224,15 @@ def process_frame(frame_img):
     return canvas
 
 
+OUTPUT_ROWS = 8  # Always 8 rows like run spritesheets
+
 def build_spritesheet(frames, cols=4):
-    """Pack frames into a spritesheet (cols wide, variable rows, 448px per row)."""
+    """Pack frames into a spritesheet (cols wide, 8 rows, 448px per row)."""
     valid = [f for f in frames if f is not None]
     if not valid:
         return None
 
-    rows = (len(valid) + cols - 1) // cols
+    rows = OUTPUT_ROWS
     sheet = Image.new("RGBA", (cols * CELL_W, rows * 448), (0, 0, 0, 0))
 
     for i, frame in enumerate(valid):
@@ -250,10 +257,10 @@ def process_direction(dir_name, src_file, json_file):
     print(f"  Source: {img.size}")
 
     total_h = img.size[1]
-    if total_h % 512 == 0:
-        rows, cell_h = 7, 512
-    elif total_h % 448 == 0:
+    if total_h % 448 == 0:
         rows, cell_h = total_h // 448, 448
+    elif total_h % 512 == 0:
+        rows, cell_h = 7, 512
     else:
         print(f"  ERROR: unknown row height (total_h={total_h})")
         return
@@ -275,7 +282,14 @@ def process_direction(dir_name, src_file, json_file):
         print(f"  SKIP: no valid frames")
         return
 
-    processed = [process_frame(f) if f else None for f in frames]
+    target_h = WALK_TARGET_H.get(dir_name, TARGET_H)
+    processed = [process_frame(f, target_h) if f else None for f in frames]
+
+    # Limit to 28 frames for consistent loop (all walk animations match)
+    max_frames = 28
+    if len(processed) > max_frames:
+        processed = processed[:max_frames]
+
     sheet = build_spritesheet(processed, cols=4)
     if sheet:
         sheet.save(dst_path)

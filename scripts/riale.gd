@@ -1,10 +1,12 @@
 extends CharacterBody2D
 
-enum State { IDLE, WALK }
+enum State { IDLE, WALK, RUN }
 
 const SPEED := 35.0
-const IDLE_FPS := 8.0
-const WALK_FPS := 10.0
+const RUN_SPEED := 70.0
+const IDLE_FPS := 20.0
+const WALK_FPS := 24.0
+const RUN_FPS := 35.0
 
 const DIRECTIONS := ["down", "down_left", "left", "up_left", "up", "up_right", "right", "down_right"]
 const IDLE_FILES := {
@@ -27,8 +29,21 @@ const WALK_FILES := {
 	"up_left": "up_left_walk.png",
 	"up_right": "up_right_walk.png",
 }
+const RUN_FILES := {
+	"down": "down_run.png",
+	"down_left": "down_left_run.png",
+	"down_right": "down_right_run.png",
+	"left": "left_run.png",
+	"right": "right_run.png",
+	"up": "up_run.png",
+	"up_left": "up_left_run.png",
+	"up_right": "up_right_run.png",
+}
 
 @onready var sprite := $Sprite as AnimatedSprite2D
+@onready var stamina := $Stamina
+
+var is_sprinting := false
 
 var state := State.IDLE
 var direction := "down"
@@ -56,6 +71,10 @@ func _setup_input():
 	_add_key("move_up", KEY_UP)
 	_add_key("move_down", KEY_DOWN)
 
+	if not InputMap.has_action("sprint"):
+		InputMap.add_action("sprint")
+	_add_key("sprint", KEY_SHIFT)
+
 
 static func _add_key(action: String, keycode: Key):
 	var ev := InputEventKey.new()
@@ -66,7 +85,8 @@ static func _add_key(action: String, keycode: Key):
 func _build_all_animations():
 	var sf := SpriteFrames.new()
 	_build_anim_set(sf, "idle_", "res://art/riale/idle/", IDLE_FILES, 4, 6, IDLE_FPS)
-	_build_anim_set(sf, "walk_", "res://art/riale/walk/", WALK_FILES, 4, 7, WALK_FPS)
+	_build_anim_set(sf, "walk_", "res://art/riale/walk/", WALK_FILES, 4, 8, WALK_FPS)
+	_build_anim_set(sf, "run_", "res://art/riale/run/", RUN_FILES, 4, 8, RUN_FPS)
 	sprite.sprite_frames = sf
 
 
@@ -114,19 +134,34 @@ func _physics_process(_delta: float):
 		Input.get_axis("move_up", "move_down")
 	)
 
+	is_sprinting = Input.is_action_pressed("sprint") and stamina.has_stamina()
+
 	if input_dir.length() > 0.2:
 		direction = _dir_from_input(input_dir)
-		_change_to(State.WALK)
-		velocity = input_dir.normalized() * SPEED
+		var move_state := State.RUN if is_sprinting else State.WALK
+		_change_to(move_state)
+		var spd := RUN_SPEED if is_sprinting else SPEED
+		velocity = input_dir.normalized() * spd
 		move_and_slide()
-	elif state == State.WALK:
-		_change_to(State.IDLE)
-		velocity = Vector2.ZERO
+		if is_sprinting:
+			stamina.start_deplete()
+		else:
+			stamina.stop_deplete()
+	else:
+		stamina.stop_deplete()
+		if state != State.IDLE:
+			_change_to(State.IDLE)
+			velocity = Vector2.ZERO
 
 
 func _change_to(new_state: State):
 	state = new_state
-	var anim := ("walk_" if state == State.WALK else "idle_") + direction
+	var prefix := "idle_"
+	match state:
+		State.WALK: prefix = "walk_"
+		State.RUN:  prefix = "run_"
+		_:          prefix = "idle_"
+	var anim := prefix + direction
 	if sprite.animation != anim:
 		sprite.play(anim)
 

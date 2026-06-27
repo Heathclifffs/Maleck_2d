@@ -1,1 +1,5 @@
+res://scripts/main.gd
 res://scripts/riale.gd
+res://scenes/stamina_bar.gd
+res://scenes/stamina_bar.tscn
+res://scripts/stamina.gd
