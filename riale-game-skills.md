@@ -47,7 +47,9 @@
 - [ ] Chromatic aberration sur actions (coups, magie)
 
 ### Phase 3 — Tilemap & Environnement
-- [ ] Tilemap isométrique avec hauteurs + Z-index auto
+- [x] Tilemap isométrique (mewki Nature Blocks ~130×130, TileSet Isometric 128×64)
+- [x] 19 tuiles sol (herbe, terre, pierre, escalier) dans `art/isometric_floor/`
+- [x] TileMapLayer dans main.tscn avec grille 40×40 générée procéduralement
 - [ ] Biomes variés (plaine, forêt, désert, montagne, lac, donjon)
 - [ ] Collisions + occlusions sur le tilemap
 - [ ] LightOccluder2D sur le terrain pour ombres portées
@@ -131,7 +133,7 @@ Shader PBR appliqué sur Riale ET Ouda pour un rendu stylisé façon 3D.
 ## Décisions Clés
 - Le personnage avance dans la direction visée (pas de strafe)
 - Sprite scale = 0.75 (était 0.5)
-- Animations nerveuses : IDLE_FPS=20, WALK_FPS=24, RUN_FPS=35
+- Animations nerveuses : IDLE_FPS=24, WALK_FPS=30, RUN_FPS=70, COMBAT_IDLE_FPS=24
 - Toutes les spritesheets en 8 rows (3072×3584) pour uniformité
 - Walk diagonaux : cell_h=448, pas de compositing (gap=0 avec 8 rows)
 - Walk left = mirror de right (la source left a les frames en ordre grid → moonwalk)

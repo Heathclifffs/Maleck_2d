@@ -3,11 +3,11 @@ extends CharacterBody2D
 enum State { IDLE, WALK, RUN, COMBAT_IDLE }
 
 const SPEED := 35.0
-const RUN_SPEED := 70.0
-const IDLE_FPS := 20.0
-const WALK_FPS := 24.0
-const RUN_FPS := 35.0
-const COMBAT_IDLE_FPS := 20.0
+const RUN_SPEED := 140.0
+const IDLE_FPS := 24.0
+const WALK_FPS := 30.0
+const RUN_FPS := 70.0
+const COMBAT_IDLE_FPS := 24.0
 const COMBAT_TIMEOUT := 3.0
 
 const DIRECTIONS := ["down", "down_left", "left", "up_left", "up", "up_right", "right", "down_right"]
@@ -67,6 +67,7 @@ func _ready():
 	_setup_input()
 	_build_all_animations()
 	sprite.play("idle_" + direction)
+	_update_sprite_offset()
 
 
 func _setup_input():
@@ -191,6 +192,7 @@ func _physics_process(delta: float):
 
 func _change_to(new_state: State):
 	state = new_state
+	_update_sprite_offset()
 	var prefix := "idle_"
 	match state:
 		State.WALK:        prefix = "walk_"
@@ -203,6 +205,18 @@ func _change_to(new_state: State):
 	var anim := prefix + direction
 	if sprite.animation != anim:
 		sprite.play(anim)
+
+
+func _update_sprite_offset():
+	match state:
+		State.IDLE:
+			sprite.position.y = -89
+		State.WALK:
+			sprite.position.y = -88
+		State.RUN:
+			sprite.position.y = -76
+		State.COMBAT_IDLE:
+			sprite.position.y = -82
 
 
 func _dir_from_input(input: Vector2) -> String:
