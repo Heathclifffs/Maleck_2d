@@ -20,13 +20,16 @@
 
 ### Phase 1 — Fondations (fait)
 - [x] Projet Godot, CharacterBody2D, AnimatedSprite2D
-- [x] Idle 8 directions (spritesheets + animation, 21 frames, 20 FPS)
-- [x] Walk 8 directions (spritesheets + animation, 28 frames, 24 FPS, 35 px/s)
-- [x] Run 8 directions (spritesheets + animation, 29 frames, 35 FPS, 70 px/s)
+- [x] Idle 8 directions Riale (spritesheets + animation, 21 frames, 20 FPS)
+- [x] Walk 8 directions Riale (spritesheets + animation, 28 frames, 24 FPS, 35 px/s)
+- [x] Run 8 directions Riale (spritesheets + animation, 29 frames, 35 FPS, 70 px/s)
+- [x] Combat idle Riale (8 directions, 29 frames, 20 FPS, tailles run)
 - [x] Sprint avec Shift + stamina (drain=20/s, regen=12/s, regen_delay=0)
 - [x] Contrôles ZQSD/WASD/Flèches + Shift, machine à états Idle↔Walk↔Run
 - [x] Camera2D attachée au personnage avec smoothing
 - [x] Sprite scale = 0.75, texture_filter = NEAREST
+- [x] Ouda idle 8 directions (29 frames, 20 FPS, 239px)
+- [x] Ouda walk 8 directions (29 frames, 24 FPS, cardinaux 239/diagonaux 215)
 
 ### Phase 2 — Core Gameplay
 - [x] Système de santé (cœurs à la Zelda, max_hp=10)
@@ -101,14 +104,28 @@
 - `art/riale/walk/` — spritesheets walk (3072×3584, 28 frames, 8 rows)
 - `art/riale/run/` — spritesheets run (3072×3584, 29 frames, 8 rows)
 - `art/riale/combat_idle/` — spritesheets combat idle (3072×3584, 29 frames, 8 rows)
+- `art/riale/combat_idle/` — spritesheets combat idle (3072×3584, 29 frames, 8 rows)
 - `art/riale/idle/` — spritesheets idle (768×...)
+- `art/ouda/idle/` — spritesheets Ouda idle (3072×3584, 29 frames, 8 rows)
+- `art/ouda/walk/` — spritesheets Ouda walk (3072×3584, 29 frames, 8 rows)
 - `riale-game-skills.md` — ce fichier (vision + roadmap)
 
+## Personnages
+### Riale
+- Idle (8 dir, 21 frames, 20 FPS, 239px)
+- Walk (8 dir, 28 frames, 24 FPS, cardinaux 239/diagonaux 215)
+- Run (8 dir, 29 frames, 35 FPS, tailles variables)
+- Combat idle (8 dir, 29 frames, 20 FPS, tailles run)
+- Sprint + stamina + santé (cœurs)
+- Tab → combat mode (auto au sprint, timeout 3s)
+
+### Ouda
+- Idle (8 dir, 29 frames, 20 FPS, 239px)
+- Walk (8 dir, 29 frames, 24 FPS, cardinaux 239/diagonaux 215)
+- Mêmes contrôles que Riale (ZQSD/WASD/Flèches)
+- Mêmes tailles que Riale (scale 0.75, cellules 768×448)
+- Sources : down, down-right, up-right, up, right → mirroring pour les 8 directions
+
 ## Sources Art
-- `Riale/anim/Walk/` — sources walk (NOBG + bbox JSON)
-- `Riale/anim/run/` — sources run (5 directions + mirrors)
-- `Riale/anim/Idle/` — sources idle
-- `Riale/anim/combat/combat_idle/` — combat idle (down/right/up)
-- `Riale/anim/combat/attack1/` — attaque 1 (down/up)
-- `Riale/anim/combat/attack2/` — attaque 2 (up)
-- `Riale/anim/combat/attack3/` — attaque 3 (up)
+- `Riale/anim/` — animations Riale (Walk, run, Idle, combat/)
+- `Ouda/anim/` — animations Ouda (Idle/, Walk/)
