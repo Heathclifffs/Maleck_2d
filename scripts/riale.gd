@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-enum State { IDLE, WALK, RUN, COMBAT_IDLE, RUNNING_JUMP, SLIDE }
+enum State { IDLE, WALK, RUN, COMBAT_IDLE, RUNNING_JUMP, SLIDE, ATTACK1 }
 
 const SPEED := 35.0
 const RUN_SPEED := 140.0
@@ -10,6 +10,7 @@ const RUN_FPS := 70.0
 const COMBAT_IDLE_FPS := 24.0
 const RUNNING_JUMP_FPS := 70.0
 const SLIDE_FPS := 70.0
+const ATTACK1_FPS := 55.0
 const COMBAT_TIMEOUT := 3.0
 
 const DIRECTIONS := ["down", "down_left", "left", "up_left", "up", "up_right", "right", "down_right"]
@@ -63,6 +64,16 @@ const RUNNING_JUMP_FILES := {
 	"up_left": "up_left_running_jump.png",
 	"up_right": "up_right_running_jump.png",
 }
+const ATTACK1_FILES := {
+	"down": "down_attack1.png",
+	"down_left": "down_left_attack1.png",
+	"down_right": "down_right_attack1.png",
+	"left": "left_attack1.png",
+	"right": "right_attack1.png",
+	"up": "up_attack1.png",
+	"up_left": "up_left_attack1.png",
+	"up_right": "up_right_attack1.png",
+}
 const SLIDE_FILES := {
 	"down": "down_running_slide.png",
 	"down_left": "down_left_running_slide.png",
@@ -83,6 +94,8 @@ var combat_idle_timer := 0.0
 
 var state := State.IDLE
 var direction := "down"
+
+var _previous_state := State.IDLE
 
 var jump_timer := 0.0
 var jump_base_offset := 0.0
@@ -131,6 +144,12 @@ func _setup_input():
 		InputMap.add_action("slide")
 	_add_key("slide", KEY_CTRL)
 
+	if not InputMap.has_action("attack"):
+		InputMap.add_action("attack")
+	var mouse := InputEventMouseButton.new()
+	mouse.button_index = MOUSE_BUTTON_LEFT
+	InputMap.action_add_event("attack", mouse)
+
 
 static func _add_key(action: String, keycode: Key):
 	var ev := InputEventKey.new()
@@ -146,6 +165,7 @@ func _build_all_animations():
 	_build_anim_set(sf, "combat_idle_", "res://art/riale/combat_idle/", COMBAT_IDLE_FILES, 4, 8, COMBAT_IDLE_FPS)
 	_build_anim_set(sf, "running_jump_", "res://art/riale/running_jump/", RUNNING_JUMP_FILES, 4, 8, RUNNING_JUMP_FPS, false)
 	_build_anim_set(sf, "slide_", "res://art/riale/running_slide/", SLIDE_FILES, 4, 8, SLIDE_FPS, false)
+	_build_anim_set(sf, "attack1_", "res://art/riale/attack1/", ATTACK1_FILES, 4, 8, ATTACK1_FPS, false)
 	sprite.sprite_frames = sf
 
 
@@ -188,6 +208,12 @@ static func _is_empty(img: Image) -> bool:
 
 
 func _unhandled_input(event: InputEvent):
+	if event.is_action_pressed("attack") and state != State.ATTACK1:
+		_previous_state = state
+		_change_to(State.ATTACK1)
+		velocity = Vector2.ZERO
+		return
+
 	if event.is_action_pressed("toggle_combat"):
 		combat_mode = not combat_mode
 		combat_idle_timer = 0.0
@@ -198,7 +224,13 @@ func _unhandled_input(event: InputEvent):
 func _on_animation_finished():
 	if state == State.RUNNING_JUMP or state == State.SLIDE:
 		_change_to(State.RUN)
+	elif state == State.ATTACK1:
+		_change_to(_previous_state)
 func _physics_process(delta: float):
+	if state == State.ATTACK1:
+		move_and_slide()
+		return
+
 	if state == State.SLIDE:
 		move_and_slide()
 		return
@@ -285,6 +317,7 @@ func _change_to(new_state: State):
 		State.COMBAT_IDLE:  prefix = "combat_idle_"
 		State.RUNNING_JUMP: prefix = "running_jump_"
 		State.SLIDE:        prefix = "slide_"
+		State.ATTACK1:      prefix = "attack1_"
 		_:
 			prefix = "combat_idle_" if combat_mode else "idle_"
 			if combat_mode:
@@ -331,6 +364,9 @@ func _update_sprite_offset():
 			jump_base_offset = off
 			sprite.scale = Vector2(s, s)
 			sprite.position.y = off
+		State.ATTACK1:
+			sprite.position.y = -89
+			sprite.scale = Vector2(0.75, 0.75)
 		State.SLIDE:
 			var s := 0.75
 			var off := -76
