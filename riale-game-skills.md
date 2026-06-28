@@ -59,8 +59,11 @@
 - [x] Système de santé (cœurs à la Zelda, max_hp=10)
 - [x] Stamina (course)
 - [x] Combat idle (état COMBAT, Tab toggle, sprint auto-activation, timeout 3s)
-- [ ] Attaques (light attack 1/2/3, hitbox, dégâts)
-- [ ] Run + combat idle pour Ouda
+- [x] Running Jump (Space en sprint, animation 29 frames, jump visuel parabolique, 8 directions dont 3 mirror)
+- [x] Slide (LCtrl en sprint, animation 29 frames, 8 directions dont 3 mirror)
+- [x] Attack1 (8 dir, 29 frames, 55 FPS, non-loop, déclenchable depuis tout état, retour état précédent)
+- [x] Run Ouda (8 dir, 25 frames, 48 FPS, sprint + stamina)
+- [ ] Attaques (attack 2/3, hitbox, dégâts)
 - [ ] Inventaire + items (Resources Godot)
 - [ ] Ramassage d'objets (ramassable générique)
 - [ ] Armes qui se cassent (durabilité)
@@ -95,7 +98,7 @@
 ## Stack Technique
 - **Moteur** : Godot Engine 4.x (GDScript, shaders GLSL)
 - **Art** : Pixel art isométrique 2D (NEAREST filtering, 768×448 frames)
-- **Taille perso** : cardinaux 239/idle-walk, 205/run, 205/combat-idle ; diagonaux 215/walk, 185/run, 185/combat-idle ; up 235/run
+- **Taille perso** : cardinaux 239/idle-walk-run, 205/combat-idle ; diagonaux 215/idle-walk-run, 185/combat-idle ; up 235/combat-idle
 - **Langage** : GDScript (scripts), Python (preprocessing spritesheets), GLSL (shaders)
 - **Dépendances** : Pillow, numpy
 
@@ -133,12 +136,19 @@ Shader PBR appliqué sur Riale ET Ouda pour un rendu stylisé façon 3D.
 ## Décisions Clés
 - Le personnage avance dans la direction visée (pas de strafe)
 - Sprite scale = 0.75 (était 0.5)
-- Animations nerveuses : IDLE_FPS=24, WALK_FPS=30, RUN_FPS=70, COMBAT_IDLE_FPS=24
+- Animations nerveuses : IDLE_FPS=24, WALK_FPS=30, RUN_FPS=70, COMBAT_IDLE_FPS=24, RUNNING_JUMP_FPS=70, SLIDE_FPS=70, ATTACK1_FPS=55
 - Toutes les spritesheets en 8 rows (3072×3584) pour uniformité
 - Walk diagonaux : cell_h=448, pas de compositing (gap=0 avec 8 rows)
 - Walk left = mirror de right (la source left a les frames en ordre grid → moonwalk)
+**→ Solution : flip cellule par cellule (PIL Image.FLIP_LEFT_RIGHT sur chaque crop), jamais flip entier**
 - Stamina regen_delay=0 (régénération instantanée dès l'arrêt)
 - Barre stamina invisible quand stamina=max
+- **Jump visuel : pas de gravité/gameplay Y. Parabole `4*t*(1-t)*30px` ajoutée au sprite.position.y sur 0.35s. La cellule contient déjà le mouvement vertical dans ses frames (feet_row varie), la parabole du code ajoute le "saut" global**
+- **Slide/Jump non-loop : animation_finished → retour à State.RUN**
+- **Collisions désactivées pendant SLIDE (move_and_slide + return)**
+- **Bug fix : après SLIDE/JUMP → `_change_to(State.RUN)`, la condition `if move_state == State.RUN` échouait si Shift relâché. Solution : `if move_state == State.RUN or state == State.RUN` pour rattraper la frame transitoire où state est encore RUN avant que `_change_to(WALK)` ne soit appelé**
+- **Attack1** : non-looping, `_on_animation_finished` → retour à `_previous_state`. `_unhandled_input` capture clic gauche, sauvegarde l'état courant, passe en ATTACK1. Pendant l'attaque, `_physics_process` fait juste `move_and_slide()` sans bouger.
+- **Source inversion attack1 left/right** : le fichier source `riale_attack_1_left.png` contient l'animation **face à droite** (pas à gauche). Le preprocessing traite donc ce fichier comme la direction `right` et le mirrore pour produire `left`. Ne PAS suivre le nom du fichier.
 - Inventaire à la BotW (grille, catégories, armes cassables)
 - Difficulté Dark Souls (pas de mini-map, pas de marqueurs, combat punitif)
 - Monde gigantesque, pas de loading screens si possible
@@ -155,31 +165,91 @@ Shader PBR appliqué sur Riale ET Ouda pour un rendu stylisé façon 3D.
 - `scripts/preprocess_idle.py` — preprocessing spritesheets idle Riale
 - `scripts/preprocess_combat_idle.py` — preprocessing combat idle Riale
 - `scripts/preprocess_ouda.py` — preprocessing Ouda idle + walk
+- `scripts/preprocess_ouda_run.py` — preprocessing Ouda run (5 sources → 8 dir via mirror)
+- `scripts/preprocess_attack1.py` — preprocessing Riale attack1 (5 sources → 8 dir, left source = right-facing)
 - `scenes/riale.tscn` — scène Riale (Sprite shader, Collision, Camera, Health, Stamina)
-- `scenes/ouda.tscn` — scène Ouda (Sprite shader, Collision, Camera)
+- `scenes/ouda.tscn` — scène Ouda (Sprite shader, Collision, Stamina, Camera)
 - `scenes/main.tscn` — scène de test (WorldEnvironment, SunLight, Riale + Ouda)
 - `scenes/heart_display.gd` + `.tscn` — UI cœurs
 - `scenes/stamina_bar.gd` + `.tscn` — barre stamina HUD
-- `art/riale/` — spritesheets Riale (idle, walk, run, combat_idle)
-- `art/ouda/` — spritesheets Ouda (idle, walk)
+- `art/riale/` — spritesheets Riale (idle, walk, run, combat_idle, running_jump, running_slide, attack1)
+- `art/ouda/` — spritesheets Ouda (idle, walk, run)
 - `riale-game-skills.md` — ce fichier (vision + roadmap)
 
 ## Personnages
 ### Riale
-- Idle (8 dir, 21 frames, 20 FPS, 239px)
-- Walk (8 dir, 28 frames, 24 FPS, cardinaux 239/diagonaux 215)
-- Run (8 dir, 29 frames, 35 FPS, tailles variables)
-- Combat idle (8 dir, 29 frames, 20 FPS, tailles run)
+- Idle (8 dir, 21 frames, 24 FPS, 239px)
+- Walk (8 dir, 28 frames, 30 FPS, cardinaux 239/diagonaux 215)
+- Run (8 dir, 29 frames, 70 FPS, cardinaux 239/diagonaux 215)
+- Combat idle (8 dir, 29 frames, 24 FPS, tailles run)
+- **Running jump** (Space en sprint, 8 dir, 29 frames, 70 FPS, non-loop → retour RUN)
+- **Slide** (LCtrl en sprint, 8 dir, 29 frames, 70 FPS, non-loop → retour RUN)
+- **Attack1** (clic gauche, 8 dir, 29 frames, 55 FPS, non-loop → retour état précédent)
 - Sprint + stamina + santé (cœurs)
 - Tab → combat mode (auto au sprint, timeout 3s)
+
+### Running Jump & Slide — Scaling
+Quand on ajoute une animation qui **transitionne depuis un état existant** (ex: Run → Jump), il faut scaler la nouvelle animation pour que sa **taille visuelle** au premier frame soit identique à l'animation source.
+
+Principe : `scale_jump = (content_height_run × 0.75) / content_height_jump`
+
+Ceci assure une transition transparente sans changement brusque de taille à l'écran. Voici les valeurs calculées :
+
+| Direction | run content | jump content | jump scale | jump offset | slide content | slide scale | slide offset |
+|-----------|-------------|--------------|------------|-------------|---------------|-------------|--------------|
+| down | 186 | 338 | 0.413 | -68 | 328 | 0.425 | -68 |
+| down_right/left | 165 | 220 | 0.562 | -56 | 216 | 0.573 | -56 |
+| right/left | 191 | 225 | 0.637 | -67 | 220 | 0.651 | -68 |
+| up_right/left | 190 | 224 | 0.636 | -69 | 231 | 0.617 | -68 |
+| up | 227 | 327 | 0.521 | -79 | 243 | 0.701 | -81 |
+
+Calcul de l'offset : `offset = -(feet_row - cell_h/2) × scale` pour que les pieds touchent le sol (y=0).
+
+### Attack1 — Déclenchable depuis tout état
+L'attaque de base (clic gauche) peut interrompre n'importe quel état (IDLE, WALK, RUN, COMBAT_IDLE, RUNNING_JUMP, SLIDE). Mécanique :
+1. L'état courant est sauvegardé dans `_previous_state`
+2. `velocity = Vector2.ZERO` (le personnage s'arrête)
+3. L'animation attack1 non-looping se joue
+4. `_physics_process` fait juste `move_and_slide()` (maintient la collision)
+5. `_on_animation_finished` → `_change_to(_previous_state)`
+6. Scale = 0.75 (identique idle/walk, target_h=239/215)
+7. **⚠️ Source inversion** : `riale_attack_1_left.png` montre le personnage face à droite. Le preprocessing traite ce fichier comme la direction `right` et le mirrore pour produire `left`. Voir `preprocess_attack1.py`.
+
+### Création d'animations manquantes par Mirroring
+Toutes les animations Riale/Ouda n'ont que 5 directions en source : **down, down_right, right, up_right, up**. Les 3 directions manquantes (left, down_left, up_left) sont obtenues par **mirroir horizontal** des directions right correspondantes.
+
+**⚠️ RÈGLE CRITIQUE — Toujours faire un flip cellule par cellule, JAMAIS un flip de l'image entière :**
+
+```
+# ❌ MAUVAIS — flip de l'image entière
+Image.FLIP_LEFT_RIGHT  # inverse aussi l'ordre des cellules dans la grille
+
+# ✅ BON — flip chaque cellule individuellement
+for row in range(rows):
+    for col in range(cols):
+        cell = img.crop((col * fw, row * fh, (col+1) * fw, (row+1) * fh))
+        flipped = cell.transpose(Image.FLIP_LEFT_RIGHT)
+        result.paste(flipped, (col * fw, row * fh))
+```
+
+Pourquoi ? Les spritesheets utilisent une grille 4×8 (ou 4×6). Si on flip l'image entière, la cellule en colonne 0 devient la colonne 3, inversant l'ordre temporel des frames de l'animation → le personnage fait moonwalk ou des sauts incohérents. En flipant chaque cellule dans sa propre grille, on préserve l'ordre des frames.
+
+### Règle d'Or du Scaling
+1. **Toujours scaler une nouvelle animation par rapport à l'état qu'elle remplace** (transition smoothe)
+2. **Toujours utiliser `content_height × 0.75` comme référence** (le scale de base du projet)
+3. **Ne JAMAIS appliquer de scale spécial sans offset correspondant** (les pieds doivent toujours toucher le sol)
+4. **Les directions down et up ont les plus grands contenus** (338-328px) → les plus petits scales (0.41-0.55)
+5. **Les directions diagonales ont des contenus moyens** (216-231px) → scales moyens (0.56-0.70)
+6. **Les directions latérales (right/left) ont les plus petits contenus** (220-231px) → scales proches de 0.65
 
 ### Ouda
 - Idle (8 dir, 29 frames, 20 FPS, 239px)
 - Walk (8 dir, 29 frames, 24 FPS, cardinaux 239/diagonaux 215)
-- Mêmes contrôles que Riale (ZQSD/WASD/Flèches)
+- Run (8 dir, 25 frames, 48 FPS, cardinaux 239/diagonaux 215, sprint + stamina)
+- Mêmes contrôles que Riale (ZQSD/WASD/Flèches + Shift sprint)
 - Mêmes tailles que Riale (scale 0.75, cellules 768×448)
 - Même shader PBR que Riale (normales + outline)
-- Sources : down, down-right, up-right, up, right → mirroring pour les 8 directions
+- Sources run : down, down-right, right, up-right, up → mirror pour left, down_left, up_left
 
 ## Sources Art
 - `Riale/anim/` — animations Riale (Walk, run, Idle, combat/)
