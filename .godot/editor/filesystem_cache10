@@ -2,8 +2,9 @@
 ::res://::1782608610
 icon.svg::CompressedTexture2D::579079539591013908::1782437243::1782608610::1::::<><><>0<>0<>ead9ad03750039186abdbac0dd539d38<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
 README.md::TextFile::-1::1782527595::0::1::::<><><>0<>0<><>::
-riale-game-skills.md::TextFile::-1::1782610525::0::1::::<><><>0<>0<><>::
-::res://art/::1782558040
+riale-game-skills.md::TextFile::-1::1782611999::0::1::::<><><>0<>0<><>::
+::res://art/::1782612070
+particle_dust.png::CompressedTexture2D::3051787696609758951::1782612049::1782612076::1::::<><><>0<>0<>c801de1d56c538b4b6380255c9c7c986<>res://.godot/imported/particle_dust.png-7fc3e15c04a4773b676530286c08affa.ctex::
 ::res://art/isometric_floor/::1782608618
 dirt1.png::CompressedTexture2D::3566527768750772403::1782558040::1782608618::1::::<><><>0<>0<>c9cf381425bfb81dfffacca400b4df91<>res://.godot/imported/dirt1.png-902341b37aab84ce7d1acf32e3dbd1aa.ctex::
 dirt2.png::CompressedTexture2D::3418102695809147250::1782558040::1782608618::1::::<><><>0<>0<>1d33a941276183bbfb0eb08c17ae3285<>res://.godot/imported/dirt2.png-db59bc2893250e24292770b2e59c276e.ctex::
@@ -118,11 +119,11 @@ up_left_walk.png::CompressedTexture2D::8488048717108890381::1782522679::17826086
 up_right_walk.png::CompressedTexture2D::3318077974113676823::1782522681::1782608617::1::::<><><>0<>0<>09ba0843849b30ffebe5ca08f3d6645b<>res://.godot/imported/up_right_walk.png-6db8f6b1eab5827ddf9b8b6cede396ca.ctex::
 up_walk.png::CompressedTexture2D::6031486019898738175::1782522678::1782608618::1::::<><><>0<>0<>3ee9bb39b0b459b688e9cee75e5dbfce<>res://.godot/imported/up_walk.png-8134abc9ba06fa4b16fc8b8d2049a5ea.ctex::
 ::res://scenes/::1782610902
-ambient_particles.tscn::PackedScene::-1::1782611123::0::1::::<><><>0<>0<><>::
+ambient_particles.tscn::PackedScene::-1::1782612062::0::1::::<><><>0<>0<><>::
 heart_display.gd::GDScript::846455197926534281::1782451682::0::1::::<>Control<><>0<>0<><>::
 heart_display.tscn::PackedScene::-1::1782451011::0::1::::<><><>0<>0<><>::res://scenes/heart_display.gd
-main.tscn::PackedScene::-1::1782611730::0::1::::<><><>0<>0<><>::res://scripts/main.gd<>res://scenes/riale.tscn<>res://scenes/heart_display.tscn<>res://scenes/stamina_bar.tscn<>res://scenes/ouda.tscn<>res://scenes/ambient_particles.tscn<>res://scripts/day_night.gd
-ouda.tscn::PackedScene::-1::1782611416::0::1::::<><><>0<>0<><>::res://scripts/ouda.gd<>res://scripts/stamina.gd<>res://shaders/riale_pbr.gdshader
+main.tscn::PackedScene::-1::1782611730::0::1::::<><><>0<>0<><>::res://scripts/main.gd<>res://scenes/riale.tscn<>res://scenes/heart_display.tscn<>res://scenes/stamina_bar.tscn<>res://scenes/ouda.tscn
+ouda.tscn::PackedScene::-1::1782611416::0::1::::<><><>0<>0<><>::res://scripts/ouda.gd<>res://shaders/riale_pbr.gdshader
 riale.tscn::PackedScene::-1::1782611413::0::1::::<><><>0<>0<><>::res://scripts/riale.gd<>res://scripts/health.gd<>res://scripts/stamina.gd<>res://shaders/riale_pbr.gdshader
 stamina_bar.gd::GDScript::2937604433188756198::1782519009::0::1::::<>Control<><>0<>0<><>::
 stamina_bar.tscn::PackedScene::-1::1782518961::0::1::::<><><>0<>0<><>::res://scenes/stamina_bar.gd
