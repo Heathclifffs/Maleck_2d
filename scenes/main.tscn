@@ -1,10 +1,12 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_fx02y"]
 [ext_resource type="PackedScene" path="res://scenes/riale.tscn" id="2_hddmh"]
 [ext_resource type="PackedScene" path="res://scenes/heart_display.tscn" id="3_heart"]
 [ext_resource type="PackedScene" path="res://scenes/stamina_bar.tscn" id="4_stbar"]
 [ext_resource type="PackedScene" path="res://scenes/ouda.tscn" id="5_ouda"]
+[ext_resource type="PackedScene" path="res://scenes/ambient_particles.tscn" id="6_particles"]
+[ext_resource type="Script" path="res://scripts/day_night.gd" id="7_dn"]
 
 [sub_resource type="Environment" id="1_env"]
 glow_enabled = true
@@ -13,6 +15,11 @@ glow_bloom = 0.05
 glow_blend_mode = 1
 tonemap_mode = 2
 tonemap_exposure = 1.0
+vignette_enabled = true
+vignette_color = Color(0, 0, 0, 1)
+vignette_intensity = 0.35
+chromatic_aberration_enabled = true
+chromatic_aberration_amount = 0.005
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_fx02y")
@@ -20,13 +27,24 @@ script = ExtResource("1_fx02y")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("1_env")
 
+[node name="CanvasModulate" type="CanvasModulate" parent="."]
+color = Color(1, 1, 1, 1)
+
 [node name="SunLight" type="DirectionalLight2D" parent="."]
 energy = 0.7
 rotation = 2.356
+shadow_enabled = true
+shadow_filter = 1
 
 [node name="FillLight" type="DirectionalLight2D" parent="."]
 energy = 0.25
 rotation = 5.498
+
+[node name="DayNight" type="Node" parent="."]
+script = ExtResource("7_dn")
+
+[node name="AmbientParticles" parent="." instance=ExtResource("6_particles")]
+position = Vector2(400, 300)
 
 [node name="Riale" parent="." instance=ExtResource("2_hddmh")]
 position = Vector2(400, 400)

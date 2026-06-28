@@ -35,13 +35,13 @@
 - [x] Post-processing : WorldEnvironment (ACES tonemap + glow bloom)
 
 ### Phase 2 — Rendu 2.5D & Polish Visuel
-- [x] Shader PBR (pseudo-normal + outline) sur Riale + Ouda
-- [x] Éclairage directionnel 2D (DirectionalLight2D)
-- [x] WorldEnvironment (ACES tonemap + glow bloom)
-- [ ] Ombres portées (LightOccluder2D) sur persos + tilemap
-- [ ] Rim light dans le shader (highlight bordure côté lumière)
-- [ ] PointLight2D dynamique (torche, aura, magie)
-- [ ] Particules d'ambiance (poussière, feuilles, lucioles, pluie)
+- [x] Shader PBR (pseudo-normal + outline + rim light) sur Riale + Ouda
+- [x] Éclairage directionnel 2D (DirectionalLight2D, ombres portées)
+- [x] WorldEnvironment (ACES tonemap + glow bloom + vignette + chromatic aberration)
+- [x] Ombres portées (LightOccluder2D) sur persos
+- [x] Rim light dans le shader (highlight bordure côté lumière)
+- [x] PointLight2D auras (torche chaude Riale, aura bleutée Ouda)
+- [x] Particules d'ambiance (poussière ambiante, GPUParticles2D)
 - [ ] Color grading custom (LUT) pour palette stylisée unique
 - [ ] Vignette dynamique (s'intensifie en combat / basse vie)
 - [ ] Chromatic aberration sur actions (coups, magie)
@@ -77,7 +77,7 @@
 - [ ] Boss (pattern, phases)
 
 ### Phase 6 — Survie & Exploration
-- [ ] Cycle jour/nuit (lumière directionnelle dynamique)
+- [x] Cycle jour/nuit (lumière directionnelle dynamique + CanvasModulate + couleurs)
 - [ ] Météo (pluie, orage, tempête → particules + audio)
 - [ ] Température (froid, chaleur → vêtements, élixirs)
 - [ ] Faim / endurance
@@ -112,12 +112,15 @@ Shader PBR appliqué sur Riale ET Ouda pour un rendu stylisé façon 3D.
 
 2. **Outline shader** — détection de bord par échantillonnage des 8 pixels voisins. Si un voisin a alpha < seuil (0.15 par défaut), le pixel est en bordure et reçoit une couleur d'outline (noir semi-transparent). Donne un rendu "bande dessinée" qui fait ressortir le personnage.
 
-3. **Éclairage directionnel 2D** — DirectionalLight2D (soleil, energy=1.8, rotation=135°). Éclaire uniformément la scène. Les normales calculées par le shader font varier la réflexion de la lumière sur les sprites.
+3. **Rim light** — fonction `light()` dans le shader : ajoute une bordure lumineuse sur le côté opposé à la lumière. Uniformes : `rim_strength=0.4`, `rim_power=3.0`. Donne un effet de "backlight" qui détoure le personnage.
 
-4. **Post-processing** — WorldEnvironment avec :
+4. **Éclairage directionnel 2D** — DirectionalLight2D (SunLight, energy=0.7, rotation=135° + FillLight, energy=0.25, rotation=315°). Éclaire uniformément la scène. Les normales calculées par le shader font varier la réflexion de la lumière sur les sprites.
+
+5. **Post-processing** — WorldEnvironment avec :
    - ACES Fitted tonemap (rendu cinématique, courbes de couleur style film)
-   - Glow bloom (intensité=0.3, blend mode=Screen) pour les zones lumineuses
-   - Exposure = 1.1
+   - Glow bloom (intensité=0.15, blend mode=Screen) pour les zones lumineuses
+   - Vignette (intensité=0.35) — bords de l'écran assombris
+   - Chromatic aberration (0.005) — frange de couleur subtile
 
 ### Shader
 
@@ -127,11 +130,63 @@ Shader PBR appliqué sur Riale ET Ouda pour un rendu stylisé façon 3D.
   - `outline_color` : couleur de l'outline (noir par défaut)
   - `outline_threshold` (0.0–1.0) : seuil de détection des bords
   - `sample_radius` (0.0–5.0) : distance d'échantillonnage pour normal + outline
+  - `rim_strength` (0.0–1.0) : intensité du rim light (0.4)
+  - `rim_power` (0.0–5.0) : concentration du rim light (3.0)
 
 ### Scène
 
-- `scenes/main.tscn` — contient WorldEnvironment + DirectionalLight2D
+- `scenes/main.tscn` — contient WorldEnvironment + DirectionalLight2D + FillLight + CanvasModulate + DayNight + AmbientParticles
 - Riale et Ouda sont côte à côte avec le même shader pour comparaison visuelle
+
+## Éclairage — Ombres Portées
+
+LightOccluder2D + DirectionalLight2D avec `shadow_enabled` pour des ombres au sol :
+
+- **Riale** : occludeur rectangulaire 28×64 à position (0, -40), centré sur le corps
+- **Ouda** : occludeur 28×64 à position (0, -38), légèrement plus bas
+- Ombres **uniquement** sur la SunLight (DirectionalLight2D) — les PointLight2D n'ont pas de shadow
+- `shadow_filter = 1` (PCF soft) pour des bordures adoucies
+- Occludeurs volontairement petits (28×64) pour des ombres serrées, pas d'ombre géante
+
+## Auras Lumineuses (PointLight2D)
+
+Chaque personnage porte une aura lumineuse (PointLight2D enfant) :
+
+| Personnage | Énergie | Couleur | Texture Scale | Position |
+|------------|---------|---------|---------------|----------|
+| Riale | 0.35 | Orange chaud (1, 0.82, 0.45) | 8.0 | (0, -60) |
+| Ouda | 0.30 | Bleu froid (0.7, 0.85, 1.0) | 6.0 | (0, -55) |
+
+Les auras utilisent la texture par défaut de PointLight2D (cercle dégradé). Pas d'ombre portée.
+
+## Cycle Jour/Nuit
+
+Script `scripts/day_night.gd` attaché à un node `DayNight` dans main.tscn :
+
+- **Durée** : 120s par cycle complet (ajustable via `day_duration`)
+- **Démarrage** : midi (time=0.25)
+- **Phases** basées sur `sin(time * TAU)` avec twilight offset (`raw * 1.4 + 0.2, clamped 0-1`) :
+
+| time | Phase | Soleil | FillLight | CanvasModulate |
+|------|-------|--------|-----------|----------------|
+| 0.00 | Aube | émerge, orange chaud, énergie~0.15 | bleu, ~0.26 | légèrement sombre |
+| 0.25 | Midi | blanc, énergie=0.7, rotation zénith | ~0.05 | blanc (aucun effet) |
+| 0.50 | Crépuscule | orangé rasant, énergie~0.15 | bleu, ~0.26 | légèrement sombre |
+| 0.75 | Nuit | éteint, couleur bleu froid | max, bleu foncé, ~0.3 | (0.25, 0.25, 0.5) |
+
+- **SunLight.rotation** tourne de PI*0.25 (est) à PI*0.75 (ouest) pendant la journée
+- **SunLight.color** : interpolé blanc→orangé (warmth×0.55) quand le soleil est bas
+- **FillLight.color** : bleuit la nuit (lerp vers 0.4, 0.5, 0.9)
+- **CanvasModulate.color** : multiplie tout le canvas — blanc le jour, bleu foncé (0.25, 0.25, 0.5) la nuit
+
+## Particules d'Ambiance
+
+`scenes/ambient_particles.tscn` — GPUParticles2D (poussière ambiante flottant vers le haut) :
+
+- 20 particules, 6s de vie
+- ParticleProcessMaterial : direction=(0,-1,0), spread=180°, scale 0.5→1.5
+- Vélocité initiale 5 px/s, pas de gravité
+- Couleur blanche alpha 0.25, local_coords=true
 
 ## Décisions Clés
 - Le personnage avance dans la direction visée (pas de strafe)
@@ -169,9 +224,11 @@ Shader PBR appliqué sur Riale ET Ouda pour un rendu stylisé façon 3D.
 - `scripts/preprocess_attack1.py` — preprocessing Riale attack1 (5 sources → 8 dir, left source = right-facing)
 - `scenes/riale.tscn` — scène Riale (Sprite shader, Collision, Camera, Health, Stamina)
 - `scenes/ouda.tscn` — scène Ouda (Sprite shader, Collision, Stamina, Camera)
-- `scenes/main.tscn` — scène de test (WorldEnvironment, SunLight, Riale + Ouda)
+- `scenes/main.tscn` — scène de test (WorldEnvironment, SunLight, FillLight, CanvasModulate, DayNight, AmbientParticles, Riale + Ouda)
 - `scenes/heart_display.gd` + `.tscn` — UI cœurs
 - `scenes/stamina_bar.gd` + `.tscn` — barre stamina HUD
+- `scenes/ambient_particles.tscn` — particules d'ambiance (poussière)
+- `scripts/day_night.gd` — cycle jour/nuit (rotation + intensité soleil, CanvasModulate)
 - `art/riale/` — spritesheets Riale (idle, walk, run, combat_idle, running_jump, running_slide, attack1)
 - `art/ouda/` — spritesheets Ouda (idle, walk, run)
 - `riale-game-skills.md` — ce fichier (vision + roadmap)

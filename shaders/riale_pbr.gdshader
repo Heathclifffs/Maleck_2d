@@ -4,6 +4,8 @@ uniform float normal_strength : hint_range(0.0, 5.0) = 2.0;
 uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 0.85);
 uniform float outline_threshold : hint_range(0.0, 1.0) = 0.15;
 uniform float sample_radius : hint_range(0.0, 5.0) = 1.0;
+uniform float rim_strength : hint_range(0.0, 1.0) = 0.4;
+uniform float rim_power : hint_range(1.0, 8.0) = 3.0;
 
 void fragment() {
 	vec4 base = texture(TEXTURE, UV);
@@ -44,4 +46,10 @@ void fragment() {
 		COLOR = mix(base, outline_color, edge);
 		COLOR.a = base.a;
 	}
+}
+
+void light() {
+	float rim = 1.0 - abs(dot(NORMAL, normalize(LIGHT_DIRECTION)));
+	rim = pow(rim, rim_power);
+	LIGHT.rgb += LIGHT.rgb * rim * rim_strength * LIGHT.a;
 }
