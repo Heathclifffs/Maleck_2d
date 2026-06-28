@@ -1,2 +1,5 @@
 res://scripts/ouda.gd
 res://scripts/riale.gd
+res://scripts/main.gd
+res://shaders/riale_pbr.gdshader
+res://scripts/day_night.gd
