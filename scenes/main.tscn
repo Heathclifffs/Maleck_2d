@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_fx02y"]
 [ext_resource type="PackedScene" path="res://scenes/riale.tscn" id="2_hddmh"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ouda.tscn" id="5_ouda"]
 [ext_resource type="PackedScene" path="res://scenes/ambient_particles.tscn" id="6_particles"]
 [ext_resource type="Script" path="res://scripts/day_night.gd" id="7_dn"]
+[ext_resource type="Script" path="res://scripts/clock_ui.gd" id="8_clock"]
+[ext_resource type="Script" path="res://scripts/minimap.gd" id="9_minimap"]
 
 [sub_resource type="Environment" id="1_env"]
 glow_enabled = true
@@ -69,3 +71,35 @@ grow_horizontal = 2
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 text = "ZQSD/WASD/Arrows | Shift=sprint | Tab=combat | Espace=degat | E=soin  | Riale shader PBR (glow+ACES)"
+
+[node name="ClockUI" type="Control" parent="UI"]
+script = ExtResource("8_clock")
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -160.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 70.0
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="UI/ClockUI"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 150.0
+offset_bottom = 46.0
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = "00:00"
+
+[node name="Minimap" type="Control" parent="UI"]
+script = ExtResource("9_minimap")
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -170.0
+offset_top = -170.0
+offset_right = -10.0
+offset_bottom = -10.0
+mouse_filter = 2

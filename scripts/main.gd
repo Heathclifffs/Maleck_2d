@@ -2,6 +2,7 @@ extends Node2D
 
 @onready var riale := $Riale
 @onready var ouda := $Ouda
+@onready var player: Node2D = riale
 @onready var info := $UI/InfoLabel as Label
 
 var rng := RandomNumberGenerator.new()
@@ -14,17 +15,43 @@ var stone_tex: Array[Texture2D] = []
 var stair_tex: Texture2D
 var floor_material: ShaderMaterial
 var step_y := 50.0
+var tile_grid: Array[Array] = []
 
 func _ready():
+	var chosen := GameState.selected_character
+	if chosen == "ouda":
+		player = ouda
+		riale.queue_free()
+		var oc := ouda.get_node_or_null("Camera2D") as Camera2D
+		if oc:
+			oc.enabled = true
+	else:
+		ouda.queue_free()
+		var rc := riale.get_node_or_null("Camera2D") as Camera2D
+		if rc:
+			rc.enabled = true
+
 	var shader := load("res://shaders/tile_pbr.gdshader") as Shader
 	if shader:
 		floor_material = ShaderMaterial.new()
 		floor_material.shader = shader
 
-	riale.get_node("Health").health_changed.connect(_on_health_changed)
-	riale.get_node("Stamina").stamina_changed.connect(_on_stamina_changed)
-	_on_health_changed(riale.get_node("Health").current_hp, riale.get_node("Health").max_hp)
-	_on_stamina_changed(riale.get_node("Stamina").current, riale.get_node("Stamina").max_stamina)
+	if player == riale:
+		riale.get_node("Health").health_changed.connect(_on_health_changed)
+		riale.get_node("Stamina").stamina_changed.connect(_on_stamina_changed)
+		_on_health_changed(riale.get_node("Health").current_hp, riale.get_node("Health").max_hp)
+		_on_stamina_changed(riale.get_node("Stamina").current, riale.get_node("Stamina").max_stamina)
+	elif player == ouda:
+		info.text = "Ouda"
+		var st := ouda.get_node_or_null("Stamina")
+		if st:
+			st.stamina_changed.connect(_on_stamina_changed)
+			var stmax := st.get("max_stamina") as float
+			_on_stamina_changed(st.get("current"), stmax)
+		var heart := get_node_or_null("HeartDisplay")
+		if heart:
+			heart.visible = false
+
 	_load_textures()
 	_build_floor()
 	_scatter_props()
@@ -59,12 +86,31 @@ func _build_floor():
 	move_child(floor_node, 0)
 
 	var step_x := 65.0
+	tile_grid.clear()
+	floor_node.set_meta("tile_grid", tile_grid)
+	floor_node.set_meta("step_x", step_x)
+	floor_node.set_meta("step_y", step_y)
+	for gx in range(25):
+		tile_grid.append([])
+		for gy in range(25):
+			tile_grid[gx].append(0)
 
 	for x in range(-12, 13):
 		for y in range(-12, 13):
 			var pos := Vector2((x - y) * step_x, (x + y) * step_y)
 
-			var tex := grass_tex[rng.randi_range(0, grass_tex.size() - 1)]
+			var tile_type := 0
+			var tex: Texture2D
+			if rng.randf() < 0.03 and dirt_tex.size() > 0:
+				tile_type = 1
+				tex = dirt_tex[rng.randi_range(0, dirt_tex.size() - 1)]
+			elif rng.randf() < 0.005 and stone_tex.size() > 0:
+				tile_type = 2
+				tex = stone_tex[rng.randi_range(0, stone_tex.size() - 1)]
+			else:
+				tex = grass_tex[rng.randi_range(0, grass_tex.size() - 1)]
+			tile_grid[x + 12][y + 12] = tile_type
+
 			var spr := Sprite2D.new()
 			spr.texture = tex
 			if floor_material:
@@ -75,13 +121,8 @@ func _build_floor():
 			spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			floor_node.add_child(spr)
 
-	if riale:
-		riale.reparent(floor_node, true)
-	if ouda:
-		ouda.reparent(floor_node, true)
-		var cam := ouda.get_node_or_null("Camera2D") as Camera2D
-		if cam:
-			cam.enabled = false
+	if is_instance_valid(player):
+		player.reparent(floor_node, true)
 
 func _scatter_props():
 	var step_x := 65.0
@@ -89,6 +130,8 @@ func _scatter_props():
 	props_node.name = "Props"
 	add_child(props_node)
 	move_child(props_node, 1)
+	props_node.set_meta("step_x", 65.0)
+	props_node.set_meta("step_y", 50.0)
 
 	var prop_shader := load("res://shaders/prop_pbr.gdshader") as Shader
 
@@ -121,6 +164,7 @@ func _scatter_props():
 		return
 
 	var used := {}
+	var prop_grid_positions: Array[Vector2] = []
 	for i in range(80):
 		var gx := rng.randi_range(-11, 11)
 		var gy := rng.randi_range(-11, 11)
@@ -132,6 +176,7 @@ func _scatter_props():
 			continue
 
 		used[key] = true
+		prop_grid_positions.append(Vector2(gx, gy))
 		var prop_entry := all_props[rng.randi_range(0, all_props.size() - 1)]
 
 		var body := StaticBody2D.new()
@@ -157,25 +202,33 @@ func _scatter_props():
 
 		props_node.add_child(body)
 
+	props_node.set_meta("prop_grid_positions", prop_grid_positions)
+
 func _update_z_indices():
-	riale.z_index = floori((riale.global_position.y + 65.0) / step_y) * 2 + 1 + 50
-	if ouda:
-		ouda.z_index = floori((ouda.global_position.y + 65.0) / step_y) * 2 + 1 + 50
+	if not is_instance_valid(player):
+		return
+	player.z_index = floori((player.global_position.y + 65.0) / step_y) * 2 + 1 + 50
 
 func _process(_delta: float):
 	_update_z_indices()
-	var dir_name: String = riale.direction.capitalize().replace("_", " ")
+	if not is_instance_valid(player):
+		return
+	var dir_name: String = player.direction.capitalize().replace("_", " ")
 	var state_names := {0: "Idle", 1: "Walk", 2: "Run", 3: "Combat"}
-	var state_name: String = state_names.get(riale.state, "?")
-	var sprint_tag := " [SPRINT]" if riale.is_sprinting else ""
-	var combat_tag := " [⚔]" if riale.combat_mode else ""
+	var state_name: String = state_names.get(player.state, "?")
+	var sprint_tag := ""
+	var combat_tag := ""
+	if "is_sprinting" in player and player.is_sprinting:
+		sprint_tag = " [SPRINT]"
+	if "combat_mode" in player and player.combat_mode:
+		combat_tag = " [⚔]"
 	info.text = state_name + " " + dir_name + sprint_tag + combat_tag + hp_text + stamina_text
 
-	if Input.is_action_just_pressed("ui_accept"):
+	if Input.is_action_just_pressed("ui_accept") and player == riale and is_instance_valid(riale):
 		riale.get_node("Health").take_damage(1)
-	if Input.is_action_just_pressed("ui_focus_next"):
+	if Input.is_action_just_pressed("ui_focus_next") and player == riale and is_instance_valid(riale):
 		riale.get_node("Health").heal(2)
-	if Input.is_action_just_pressed("ui_cancel"):
+	if Input.is_action_just_pressed("ui_cancel") and player == riale and is_instance_valid(riale):
 		riale.get_node("Health").take_damage(10)
 
 func _on_health_changed(hp, mhp):

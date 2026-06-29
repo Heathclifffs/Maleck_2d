@@ -13,7 +13,7 @@ func _process(delta):
 		dt *= 30.0
 	time = fmod(time + dt, 1.0)
 
-	var raw := sin(time * TAU)
+	var raw := sin((time - 0.25) * TAU)
 	var sun_height := clampf(raw * 1.4 + 0.2, 0.0, 1.0)
 
 	sun.energy = 0.7 * sun_height
