@@ -8,7 +8,10 @@ var day_duration := 120.0
 var time := 0.25
 
 func _process(delta):
-	time = fmod(time + delta / day_duration, 1.0)
+	var dt: float = delta / day_duration
+	if Input.is_key_pressed(KEY_T):
+		dt *= 30.0
+	time = fmod(time + dt, 1.0)
 
 	var raw := sin(time * TAU)
 	var sun_height := clampf(raw * 1.4 + 0.2, 0.0, 1.0)

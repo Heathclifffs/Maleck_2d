@@ -18,7 +18,7 @@ polygon = PackedVector2Array(-14, -56, 14, -56, 14, 8, -14, 8)
 script = ExtResource("1_6bcvd")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.75, 0.75)
+scale = Vector2(0.51, 0.51)
 texture_filter = 0
 material = SubResource("2_mat")
 

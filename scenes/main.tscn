@@ -44,7 +44,6 @@ rotation = 5.498
 script = ExtResource("7_dn")
 
 [node name="AmbientParticles" parent="." instance=ExtResource("6_particles")]
-position = Vector2(400, 300)
 
 [node name="Riale" parent="." instance=ExtResource("2_hddmh")]
 position = Vector2(400, 400)
