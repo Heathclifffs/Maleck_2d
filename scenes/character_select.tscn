@@ -1,0 +1,179 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_select.gd" id="1_cs"]
+[ext_resource type="Texture2D" path="res://art/ui/border/panel-border-000.png" id="2_border"]
+[ext_resource type="Texture2D" path="res://art/ui/divider/divider-000.png" id="3_divider"]
+
+[node name="CharacterSelect" type="Control"]
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_cs")
+
+[node name="Title" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 30.0
+offset_right = 300.0
+offset_bottom = 90.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 44
+horizontal_alignment = 1
+text = "Choisissez votre personnage"
+theme_override_colors/font_color = Color(1, 0.85, 0.5, 1)
+
+[node name="Divider" type="TextureRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -192.0
+offset_top = 100.0
+offset_right = 192.0
+offset_bottom = 144.0
+grow_horizontal = 2
+texture = ExtResource("3_divider")
+stretch_mode = 0
+modulate = Color(0.7, 0.55, 0.3, 0.4)
+
+[node name="HBox" type="HBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -420.0
+offset_top = 160.0
+offset_right = 420.0
+offset_bottom = 620.0
+grow_horizontal = 2
+theme_override_constants/separation = 40
+
+[node name="Riale" type="Control" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(300, 440)
+mouse_filter = 0
+
+[node name="BgPanel" type="NinePatchRect" parent="HBox/Riale"]
+mouse_filter = 2
+layout_mode = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+texture = ExtResource("2_border")
+patch_margin_left = 32
+patch_margin_top = 32
+patch_margin_right = 32
+patch_margin_bottom = 32
+modulate = Color(0.6, 0.45, 0.25, 0.2)
+
+[node name="Sprite" type="TextureRect" parent="HBox/Riale"]
+mouse_filter = 2
+layout_mode = 0
+offset_left = 80.0
+offset_top = 30.0
+offset_right = 220.0
+offset_bottom = 190.0
+texture_filter = 0
+stretch_mode = 4
+
+[node name="Name" type="Label" parent="HBox/Riale"]
+mouse_filter = 2
+layout_mode = 0
+offset_left = 10.0
+offset_top = 210.0
+offset_right = 290.0
+offset_bottom = 250.0
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+text = "Riale"
+theme_override_colors/font_color = Color(1, 0.85, 0.5, 1)
+
+[node name="Desc" type="Label" parent="HBox/Riale"]
+mouse_filter = 2
+layout_mode = 0
+offset_left = 15.0
+offset_top = 260.0
+offset_right = 285.0
+offset_bottom = 430.0
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+text = "Un guerrier agile maniant l'épée avec une vitesse fulgurante. Spécialisé dans le combat rapproché et les enchaînements dévastateurs."
+theme_override_colors/font_color = Color(0.85, 0.8, 0.7, 1)
+
+[node name="Ouda" type="Control" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(300, 440)
+mouse_filter = 0
+
+[node name="BgPanel" type="NinePatchRect" parent="HBox/Ouda"]
+mouse_filter = 2
+layout_mode = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+texture = ExtResource("2_border")
+patch_margin_left = 32
+patch_margin_top = 32
+patch_margin_right = 32
+patch_margin_bottom = 32
+modulate = Color(0.6, 0.45, 0.25, 0.2)
+
+[node name="Sprite" type="TextureRect" parent="HBox/Ouda"]
+mouse_filter = 2
+layout_mode = 0
+offset_left = 80.0
+offset_top = 30.0
+offset_right = 220.0
+offset_bottom = 190.0
+texture_filter = 0
+stretch_mode = 4
+
+[node name="Name" type="Label" parent="HBox/Ouda"]
+mouse_filter = 2
+layout_mode = 0
+offset_left = 10.0
+offset_top = 210.0
+offset_right = 290.0
+offset_bottom = 250.0
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+text = "Ouda"
+theme_override_colors/font_color = Color(1, 0.85, 0.5, 1)
+
+[node name="Desc" type="Label" parent="HBox/Ouda"]
+mouse_filter = 2
+layout_mode = 0
+offset_left = 15.0
+offset_top = 260.0
+offset_right = 285.0
+offset_bottom = 430.0
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 2
+text = "Un mage mystérieux maniant les éléments. Ses sorts à distance lui permettent de contrôler le champ de bataille avec une grande polyvalence."
+theme_override_colors/font_color = Color(0.85, 0.8, 0.7, 1)
+
+[node name="BackBtn" type="Button" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 640.0
+offset_right = 100.0
+offset_bottom = 690.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 24
+text = "Retour"

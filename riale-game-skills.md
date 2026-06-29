@@ -92,7 +92,7 @@
 
 ### Phase 8 — Polish Final
 - [ ] Sons / musique (ambiance, combat, exploration)
-- [ ] Écran-titre, menus, game over
+- [x] Écran-titre, menus, game over
 - [ ] Optimisation, tests, équilibrage
 
 ## Stack Technique
@@ -193,6 +193,12 @@ Script `scripts/day_night.gd` attaché à un node `DayNight` dans main.tscn :
 - Sprite scale = 0.75 (était 0.5)
 - Animations nerveuses : IDLE_FPS=24, WALK_FPS=30, RUN_FPS=70, COMBAT_IDLE_FPS=24, RUNNING_JUMP_FPS=70, SLIDE_FPS=70, ATTACK1_FPS=55
 - Toutes les spritesheets en 8 rows (3072×3584) pour uniformité
+- **UI Theming** : StyleBoxTexture 9-slice avec `content_margin_*` (pas `patch_margin_*` ni `set_patch_margin()`) pour bordure fantasy sur boutons
+- **NinePatchRect** pour les bordures de cartes personnage (évite la distorsion du stretch)
+- **Cliques sur cartes** : `mouse_filter=2` (IGNORE) sur tous les enfants Control + `mouse_filter=0` (STOP) sur la carte parente + `gui_input` + `mouse_entered`/`mouse_exited`
+- **Personnage unique** : `queue_free()` le non-choisi dans `_ready()` de main.gd, variable `player` pointe vers l'actif
+- **Ouda pas de Health** : désactiver HeartDisplay, connecter uniquement Stamina
+- **Ouda Camera2D** : existe dans ouda.tscn, activée/désactivée selon choix
 - Walk diagonaux : cell_h=448, pas de compositing (gap=0 avec 8 rows)
 - Walk left = mirror de right (la source left a les frames en ordre grid → moonwalk)
 **→ Solution : flip cellule par cellule (PIL Image.FLIP_LEFT_RIGHT sur chaque crop), jamais flip entier**
@@ -231,7 +237,18 @@ Script `scripts/day_night.gd` attaché à un node `DayNight` dans main.tscn :
 - `scripts/day_night.gd` — cycle jour/nuit (rotation + intensité soleil, CanvasModulate)
 - `art/riale/` — spritesheets Riale (idle, walk, run, combat_idle, running_jump, running_slide, attack1)
 - `art/ouda/` — spritesheets Ouda (idle, walk, run)
-- `riale-game-skills.md` — ce fichier (vision + roadmap)
+- `arcane-survey-2025-06-29.md` — notes session UI/menus/Godot 4 API
+- `scripts/game_state.gd` — autoload singleton (selected_character)
+- `scripts/main_menu.gd` — menu principal fantasy (boutons StyleBoxTexture)
+- `scenes/main_menu.tscn` — menu avec layout gauche, fond à venir
+- `scripts/character_select.gd` — sélection Riale/Ouda avec hover lumineux
+- `scenes/character_select.tscn` — cartes perso avec NinePatchRect
+- `scripts/clock_ui.gd` — horloge HH:MM + barre jour/nuit
+- `scripts/minimap.gd` — minimap grille 25×25 + props + persos
+- `art/ui/panel/` — 32 panels Kenney fantasy-ui-borders (Double 96×96)
+- `art/ui/border/` — 32 borders Kenney (StyleBoxTexture 9-slice)
+- `art/ui/divider/` — 6+6 dividers Kenney
+- `art/ui/fonts/` — police icônes clavier/souris Kenney input-prompts 1.5
 
 ## Personnages
 ### Riale

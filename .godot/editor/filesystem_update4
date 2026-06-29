@@ -1,1 +1,6 @@
 res://scripts/main.gd
+res://scripts/clock_ui.gd
+res://scripts/minimap.gd
+res://scripts/day_night.gd
+res://scripts/main_menu.gd
+res://scripts/character_select.gd
