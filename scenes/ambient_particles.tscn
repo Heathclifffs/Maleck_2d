@@ -1,26 +1,33 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Texture2D" path="res://art/particle_dust.png" id="1_dust"]
+[ext_resource type="Texture2D" path="res://art/firefly_glow.png" id="1_glow"]
+[ext_resource type="Script" path="res://scripts/ambient_particles.gd" id="2_script"]
 
 [sub_resource type="ParticleProcessMaterial" id="1_mat"]
 particle_flag_disable_z = true
-initial_velocity = 15.0
-direction = Vector3(0, -1, 0)
-spread = 180.0
-gravity = Vector3(0, 0, 0)
-scale_min = 0.5
-scale_max = 2.0
-color = Color(1, 1, 1, 0.3)
-hue_variation = 0.0
+initial_velocity = 5.0
+direction = Vector3(0.0, -1.0, 0.0)
+spread = 360.0
+gravity = Vector3(0.0, 0.0, 0.0)
+scale_min = 0.4
+scale_max = 1.0
+color = Color(0.4, 1.0, 0.3, 1.0)
+hue_variation = 0.15
 
 [node name="AmbientParticles" type="GPUParticles2D"]
-amount = 30
+script = ExtResource("2_script")
+amount = 120
 lifetime = 6.0
+lifetime_randomness = 0.5
 explosiveness = 0.0
 one_shot = false
 preprocess = 3.0
 speed_scale = 1.0
 process_material = SubResource("1_mat")
-texture = ExtResource("1_dust")
-emitting = true
+texture = ExtResource("1_glow")
+emitting = false
 local_coords = false
+z_index = 200
+texture_filter = 1
+emission_shape = 3
+emission_rect = Rect2(-800.0, -600.0, 1600.0, 1200.0)

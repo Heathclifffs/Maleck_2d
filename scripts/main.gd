@@ -27,6 +27,7 @@ func _ready():
 	_on_stamina_changed(riale.get_node("Stamina").current, riale.get_node("Stamina").max_stamina)
 	_load_textures()
 	_build_floor()
+	_scatter_props()
 
 func _load_textures():
 	var dir := DirAccess.open("res://art/isometric_floor/")
@@ -62,14 +63,16 @@ func _build_floor():
 	for x in range(-12, 13):
 		for y in range(-12, 13):
 			var pos := Vector2((x - y) * step_x, (x + y) * step_y)
+
 			var tex := grass_tex[rng.randi_range(0, grass_tex.size() - 1)]
 			var spr := Sprite2D.new()
 			spr.texture = tex
+			if floor_material:
+				spr.material = floor_material
+
 			spr.position = pos
 			spr.z_index = (x + y) * 2 + 50
 			spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-			if floor_material:
-				spr.material = floor_material
 			floor_node.add_child(spr)
 
 	if riale:
@@ -79,6 +82,80 @@ func _build_floor():
 		var cam := ouda.get_node_or_null("Camera2D") as Camera2D
 		if cam:
 			cam.enabled = false
+
+func _scatter_props():
+	var step_x := 65.0
+	var props_node := Node2D.new()
+	props_node.name = "Props"
+	add_child(props_node)
+	move_child(props_node, 1)
+
+	var prop_shader := load("res://shaders/prop_pbr.gdshader") as Shader
+
+	var categories := {
+		"plants": ["res://art/props/plants/", Vector2(-2, -103), Vector2(28, 16)],
+		"exotic": ["res://art/props/exotic/", Vector2(-10, -84), Vector2(36, 20)],
+		"bamboo": ["res://art/props/bamboo/", Vector2(-18, -234), Vector2(32, 18)],
+		"trees": ["res://art/props/trees/", Vector2(-29, -314), Vector2(40, 24)],
+	}
+
+	var all_props: Array[Dictionary] = []
+	for cat_name in categories:
+		var entry := categories[cat_name] as Array
+		var dir_path := entry[0] as String
+		var cat_offset := entry[1] as Vector2
+		var cat_col_shape := entry[2] as Vector2
+		var dir := DirAccess.open(dir_path)
+		if not dir:
+			continue
+		dir.list_dir_begin()
+		var f := dir.get_next()
+		while f != "":
+			if not dir.current_is_dir() and f.get_extension().to_lower() == "png":
+				var tex := load(dir_path + f) as Texture2D
+				if tex:
+					all_props.append({"tex": tex, "offset": cat_offset, "col_shape": cat_col_shape})
+			f = dir.get_next()
+
+	if all_props.is_empty():
+		return
+
+	var used := {}
+	for i in range(80):
+		var gx := rng.randi_range(-11, 11)
+		var gy := rng.randi_range(-11, 11)
+		var key := str(gx) + "," + str(gy)
+		if used.has(key):
+			continue
+		var dist := sqrt(pow(gx - 3.0, 2) + pow(gy - 1.0, 2))
+		if dist < 4.0:
+			continue
+
+		used[key] = true
+		var prop_entry := all_props[rng.randi_range(0, all_props.size() - 1)]
+
+		var body := StaticBody2D.new()
+		body.position = Vector2((gx - gy) * step_x, (gx + gy) * step_y)
+
+		var spr := Sprite2D.new()
+		spr.texture = prop_entry["tex"]
+		spr.offset = prop_entry["offset"]
+		spr.z_index = (gx + gy) * 2 + 60
+		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		if prop_shader:
+			var mat := ShaderMaterial.new()
+			mat.shader = prop_shader
+			spr.material = mat
+		body.add_child(spr)
+
+		var col_shape := CollisionShape2D.new()
+		var rect := RectangleShape2D.new()
+		rect.size = prop_entry["col_shape"]
+		col_shape.shape = rect
+		col_shape.position = Vector2(0, 0)
+		body.add_child(col_shape)
+
+		props_node.add_child(body)
 
 func _update_z_indices():
 	riale.z_index = floori((riale.global_position.y + 65.0) / step_y) * 2 + 1 + 50
