@@ -17,19 +17,24 @@ var floor_material: ShaderMaterial
 var step_y := 50.0
 var tile_grid: Array[Array] = []
 
+const PICKUP_SCENE := preload("res://scenes/pickup_item.tscn")
+const PUSHABLE_SCENE := preload("res://scenes/pushable_block.tscn")
+const CLIMBABLE_SCENE := preload("res://scenes/climbable_ledge.tscn")
+const WATER_SCENE := preload("res://scenes/water_zone.tscn")
+
 func _ready():
 	var chosen := GameState.selected_character
 	if chosen == "ouda":
 		player = ouda
-		riale.queue_free()
-		var oc := ouda.get_node_or_null("Camera2D") as Camera2D
-		if oc:
-			oc.enabled = true
-	else:
-		ouda.queue_free()
 		var rc := riale.get_node_or_null("Camera2D") as Camera2D
 		if rc:
-			rc.enabled = true
+			rc.enabled = false
+		riale.queue_free()
+	else:
+		var oc := ouda.get_node_or_null("Camera2D") as Camera2D
+		if oc:
+			oc.enabled = false
+		ouda.queue_free()
 
 	var shader := load("res://shaders/tile_pbr.gdshader") as Shader
 	if shader:
@@ -55,6 +60,10 @@ func _ready():
 	_load_textures()
 	_build_floor()
 	_scatter_props()
+	_spawn_test_pickups()
+	_spawn_pushable_blocks()
+	_spawn_climbable_ledges()
+	_spawn_water_zones()
 
 func _load_textures():
 	var dir := DirAccess.open("res://art/isometric_floor/")
@@ -204,6 +213,98 @@ func _scatter_props():
 
 	props_node.set_meta("prop_grid_positions", prop_grid_positions)
 
+func _spawn_test_pickups():
+	var step_x := 65.0
+	var used := {}
+	var item_names := ["Herbe", "Bois", "Pierre", "Pomme", "Champignon"]
+
+	for i in range(40):
+		var gx := rng.randi_range(-11, 11)
+		var gy := rng.randi_range(-11, 11)
+		var key := str(gx) + "," + str(gy)
+		if used.has(key):
+			continue
+		var dist := sqrt(pow(gx, 2) + pow(gy, 2))
+		if dist < 3.0:
+			continue
+
+		used[key] = true
+		var item := PICKUP_SCENE.instantiate() as PickupItem
+		item.position = Vector2((gx - gy) * step_x, (gx + gy) * step_y)
+		item.item_name = item_names[rng.randi_range(0, item_names.size() - 1)]
+		item.z_index = (gx + gy) * 2 + 55
+		add_child(item)
+		move_child(item, 1)
+
+func _spawn_pushable_blocks():
+	var step_x := 65.0
+	var used := {}
+	for i in range(12):
+		var gx := rng.randi_range(-8, 8)
+		var gy := rng.randi_range(-8, 8)
+		var key := str(gx) + "," + str(gy)
+		if used.has(key):
+			continue
+		var dist := sqrt(pow(gx, 2) + pow(gy, 2))
+		if dist < 3.0:
+			continue
+		used[key] = true
+		var block := PUSHABLE_SCENE.instantiate() as PushableBlock
+		block.position = Vector2((gx - gy) * step_x, (gx + gy) * step_y)
+		block.z_index = (gx + gy) * 2 + 55
+		add_child(block)
+		move_child(block, 1)
+
+func _spawn_climbable_ledges():
+	var step_x := 65.0
+	var used := {}
+	for i in range(6):
+		var gx := rng.randi_range(-11, 11)
+		var gy := rng.randi_range(-11, 11)
+		var key := str(gx) + "," + str(gy)
+		if used.has(key):
+			continue
+		var dist := sqrt(pow(gx, 2) + pow(gy, 2))
+		if dist < 4.0:
+			continue
+		used[key] = true
+		var ledge = CLIMBABLE_SCENE.instantiate()
+		ledge.position = Vector2((gx - gy) * step_x, (gx + gy) * step_y)
+		ledge.z_index = (gx + gy) * 2 + 55
+		add_child(ledge)
+		move_child(ledge, 1)
+
+func _spawn_water_zones():
+	var step_x := 65.0
+	var lake_cells := [
+		[-2, -2], [-1, -2], [0, -2], [1, -2],
+		[-3, -1], [-2, -1], [-1, -1], [0, -1], [1, -1], [2, -1],
+		[-3, 0],  [-2, 0],  [-1, 0],            [1, 0],  [2, 0],
+		[-3, 1],  [-2, 1],  [-1, 1],  [0, 1],  [1, 1],  [2, 1],
+		[-2, 2],  [-1, 2],  [0, 2],  [1, 2],
+	]
+	var water_tex := load("res://art/water_spritesheet.png") as Texture2D
+	for cell in lake_cells:
+		var gx: int = cell[0]
+		var gy: int = cell[1]
+		var water := WATER_SCENE.instantiate()
+		water.position = Vector2((gx - gy) * step_x, (gx + gy) * step_y)
+		water.z_index = (gx + gy) * 2 + 55
+		add_child(water)
+		move_child(water, 1)
+		water.set_rect(Vector2(130, 100))
+		if water_tex:
+			var tile := Sprite2D.new()
+			tile.texture = water_tex
+			tile.region_enabled = true
+			tile.region_rect = Rect2(0, 0, 130, 130)
+			tile.position = water.position
+			tile.z_index = (gx + gy) * 2 + 54
+			tile.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			tile.set_script(preload("res://scripts/water_tile.gd"))
+			add_child(tile)
+			move_child(tile, 1)
+
 func _update_z_indices():
 	if not is_instance_valid(player):
 		return
@@ -214,7 +315,7 @@ func _process(_delta: float):
 	if not is_instance_valid(player):
 		return
 	var dir_name: String = player.direction.capitalize().replace("_", " ")
-	var state_names := {0: "Idle", 1: "Walk", 2: "Run", 3: "Combat"}
+	var state_names := {0: "Idle", 1: "Walk", 2: "Run", 3: "Combat", 8: "Pickup", 9: "Push", 10: "ClimbH", 11: "ClimbUp", 12: "Death", 13: "Swim", 14: "Dmg"}
 	var state_name: String = state_names.get(player.state, "?")
 	var sprint_tag := ""
 	var combat_tag := ""

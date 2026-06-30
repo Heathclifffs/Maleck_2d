@@ -16,12 +16,12 @@ run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.6")
 config/icon="res://icon.svg"
 
+[autoload]
+
+GameState="*res://scripts/game_state.gd"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
 textures/vram_compression/import_etc2_astc=true
 textures/default_filters/texture_filter=0
-
-[autoload]
-
-GameState="*res://scripts/game_state.gd"

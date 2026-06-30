@@ -27,7 +27,7 @@ TARGET_H = 239
 WALK_TARGET_H = {
     "down": 239, "down_left": 215, "down_right": 215,
     "up": 239, "up_left": 215, "up_right": 215,
-    "left": 239, "right": 239,
+    "left": 215, "right": 215,
 }
 TARGET_FEET_Y = 344
 CELL_W = 768

@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/pushable_block.gd" id="1_push"]
+
+[sub_resource type="RectangleShape2D" id="1_shape"]
+size = Vector2(32, 16)
+
+[node name="PushableBlock" type="CharacterBody2D"]
+script = ExtResource("1_push")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1_shape")
+position = Vector2(0, 8)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.25, 0.25)
+texture_filter = 0

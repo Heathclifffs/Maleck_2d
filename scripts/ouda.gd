@@ -157,11 +157,11 @@ func _physics_process(delta: float):
 func _update_sprite_offset():
 	match state:
 		State.IDLE:
-			sprite.position.y = -88
+			sprite.position.y = -59
 		State.WALK:
-			sprite.position.y = -86
+			sprite.position.y = -57
 		State.RUN:
-			sprite.position.y = -76
+			sprite.position.y = -51
 
 func _change_to(new_state: State):
 	state = new_state
