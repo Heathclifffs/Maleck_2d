@@ -27,7 +27,7 @@
 - [x] Sprint avec Shift + stamina (drain=20/s, regen=12/s, regen_delay=0)
 - [x] Contrôles ZQSD/WASD/Flèches + Shift, machine à états Idle↔Walk↔Run
 - [x] Camera2D attachée au personnage avec smoothing
-- [x] Sprite scale = 0.75, texture_filter = NEAREST
+- [x] Sprite scale = 0.5, texture_filter = NEAREST
 - [x] Ouda idle 8 directions (29 frames, 20 FPS, 239px)
 - [x] Ouda walk 8 directions (29 frames, 24 FPS, cardinaux 239/diagonaux 215)
 - [x] Rendu 2.5D : shader PBR (pseudo-normals + outline) sur Riale + Ouda
@@ -63,9 +63,15 @@
 - [x] Slide (LCtrl en sprint, animation 29 frames, 8 directions dont 3 mirror)
 - [x] Attack1 (8 dir, 29 frames, 55 FPS, non-loop, déclenchable depuis tout état, retour état précédent)
 - [x] Run Ouda (8 dir, 25 frames, 48 FPS, sprint + stamina)
-- [ ] Attaques (attack 2/3, hitbox, dégâts)
+- [x] Attack2 (8 dir, 29 frames, 55 FPS, combo)
+- [x] Pickup (8 dir, ramassage d'objets, 40 items spawn)
+- [x] Push (8 dir, blocs poussables, 12 blocks spawn)
+- [x] Climb hang + climb up (corniches, 6 spawn)
+- [x] Death (8 dir, respawn → IDLE)
+- [x] Swim (8 dir, eau, détection zone, 20px/s)
+- [x] Taken damage (8 dir, animation toucher → retour état)
+- [ ] Hitbox, dégâts, combat complet
 - [ ] Inventaire + items (Resources Godot)
-- [ ] Ramassage d'objets (ramassable générique)
 - [ ] Armes qui se cassent (durabilité)
 - [ ] Cuisine / élixirs (craft)
 
@@ -98,7 +104,7 @@
 ## Stack Technique
 - **Moteur** : Godot Engine 4.x (GDScript, shaders GLSL)
 - **Art** : Pixel art isométrique 2D (NEAREST filtering, 768×448 frames)
-- **Taille perso** : cardinaux 239/idle-walk-run, 205/combat-idle ; diagonaux 215/idle-walk-run, 185/combat-idle ; up 235/combat-idle
+- **Taille perso (TARGET_H)** : idle/walk/death : down/up=239, left/right=239, diag=215 ; run : down=205, up=235, left/right=205, diag=185-200 ; combat_idle : idem run ; attack : down/up=239, left/right=239, diag=215 ; climb : down/up=239, left/right=215, diag=215 ; swim : down/up=130, left/right=130, diag=120 ; taken_damage : down/up=215, left/right=215, diag=200 ; push : idem attack
 - **Langage** : GDScript (scripts), Python (preprocessing spritesheets), GLSL (shaders)
 - **Dépendances** : Pillow, numpy
 
@@ -190,7 +196,7 @@ Script `scripts/day_night.gd` attaché à un node `DayNight` dans main.tscn :
 
 ## Décisions Clés
 - Le personnage avance dans la direction visée (pas de strafe)
-- Sprite scale = 0.75 (était 0.5)
+- Sprite scale = 0.5
 - Animations nerveuses : IDLE_FPS=24, WALK_FPS=30, RUN_FPS=70, COMBAT_IDLE_FPS=24, RUNNING_JUMP_FPS=70, SLIDE_FPS=70, ATTACK1_FPS=55
 - Toutes les spritesheets en 8 rows (3072×3584) pour uniformité
 - **UI Theming** : StyleBoxTexture 9-slice avec `content_margin_*` (pas `patch_margin_*` ni `set_patch_margin()`) pour bordure fantasy sur boutons
@@ -224,6 +230,12 @@ Script `scripts/day_night.gd` attaché à un node `DayNight` dans main.tscn :
 - `scripts/preprocess_walk.py` — preprocessing spritesheets walk Riale
 - `scripts/preprocess_run.py` — preprocessing spritesheets run Riale
 - `scripts/preprocess_idle.py` — preprocessing spritesheets idle Riale
+- `scripts/preprocess_swim.py` — preprocessing swim Riale (target_h=130/120, source swim/)
+- `scripts/preprocess_taken_damage.py` — preprocessing taken_damage (target_h=215/200, source taken_damage/)
+- `scripts/preprocess_death.py` — preprocessing death (target_h=239/215, source death/)
+- `scripts/preprocess_pickup.py` — preprocessing pickup (source pick up/)
+- `scripts/preprocess_push.py` — preprocessing push (3 sources → 8 dir, source push/)
+- `scripts/preprocess_climb.py` — preprocessing climb_hang (4 frames) + climb_up (29 frames, source climb up/)
 - `scripts/preprocess_combat_idle.py` — preprocessing combat idle Riale
 - `scripts/preprocess_ouda.py` — preprocessing Ouda idle + walk
 - `scripts/preprocess_ouda_run.py` — preprocessing Ouda run (5 sources → 8 dir via mirror)
@@ -235,7 +247,7 @@ Script `scripts/day_night.gd` attaché à un node `DayNight` dans main.tscn :
 - `scenes/stamina_bar.gd` + `.tscn` — barre stamina HUD
 - `scenes/ambient_particles.tscn` — particules d'ambiance (poussière)
 - `scripts/day_night.gd` — cycle jour/nuit (rotation + intensité soleil, CanvasModulate)
-- `art/riale/` — spritesheets Riale (idle, walk, run, combat_idle, running_jump, running_slide, attack1)
+- `art/riale/` — spritesheets Riale (idle, walk, run, combat_idle, running_jump, running_slide, attack1, attack2, pickup, push, climb_hang, climb_up, death, swim, taken_damage)
 - `art/ouda/` — spritesheets Ouda (idle, walk, run)
 - `arcane-survey-2025-06-29.md` — notes session UI/menus/Godot 4 API
 - `scripts/game_state.gd` — autoload singleton (selected_character)
@@ -252,13 +264,21 @@ Script `scripts/day_night.gd` attaché à un node `DayNight` dans main.tscn :
 
 ## Personnages
 ### Riale
-- Idle (8 dir, 21 frames, 24 FPS, 239px)
+- Idle (8 dir, 29 frames, 24 FPS, 239px)
 - Walk (8 dir, 28 frames, 30 FPS, cardinaux 239/diagonaux 215)
-- Run (8 dir, 29 frames, 70 FPS, cardinaux 239/diagonaux 215)
+- Run (8 dir, 29 frames, 70 FPS, cardinaux 205/up=235/diagonaux 185-200)
 - Combat idle (8 dir, 29 frames, 24 FPS, tailles run)
 - **Running jump** (Space en sprint, 8 dir, 29 frames, 70 FPS, non-loop → retour RUN)
 - **Slide** (LCtrl en sprint, 8 dir, 29 frames, 70 FPS, non-loop → retour RUN)
 - **Attack1** (clic gauche, 8 dir, 29 frames, 55 FPS, non-loop → retour état précédent)
+- **Attack2** (combo, 8 dir, 29 frames, 55 FPS, non-loop)
+- **Pickup** (E, 8 dir, 29 frames, 24 FPS, non-loop)
+- **Push** (E sur bloc, 8 dir, 29 frames, 24 FPS, non-loop, 20px/s)
+- **Climb hang** (E sur corniche, 8 dir, 4 frames, 24 FPS, looping, déplacement horizontal limité)
+- **Climb up** (E/↑ depuis hang, 8 dir, 29 frames, 24 FPS, non-loop → téléportation)
+- **Death** (HP ≤ 0, 8 dir, 29 frames, 24 FPS, non-loop → retour IDLE)
+- **Swim** (dans eau, 8 dir, 29 frames, 24 FPS, looping, 20px/s)
+- **Taken damage** (touché, 8 dir, 29 frames, 24 FPS, non-loop → retour IDLE/COMBAT)
 - Sprint + stamina + santé (cœurs)
 - Tab → combat mode (auto au sprint, timeout 3s)
 
@@ -286,7 +306,7 @@ L'attaque de base (clic gauche) peut interrompre n'importe quel état (IDLE, WAL
 3. L'animation attack1 non-looping se joue
 4. `_physics_process` fait juste `move_and_slide()` (maintient la collision)
 5. `_on_animation_finished` → `_change_to(_previous_state)`
-6. Scale = 0.75 (identique idle/walk, target_h=239/215)
+6. Scale = 0.5 (identique idle/walk, target_h=239/215)
 7. **⚠️ Source inversion** : `riale_attack_1_left.png` montre le personnage face à droite. Le preprocessing traite ce fichier comme la direction `right` et le mirrore pour produire `left`. Voir `preprocess_attack1.py`.
 
 ### Création d'animations manquantes par Mirroring
@@ -321,10 +341,37 @@ Pourquoi ? Les spritesheets utilisent une grille 4×8 (ou 4×6). Si on flip l'im
 - Walk (8 dir, 29 frames, 24 FPS, cardinaux 239/diagonaux 215)
 - Run (8 dir, 25 frames, 48 FPS, cardinaux 239/diagonaux 215, sprint + stamina)
 - Mêmes contrôles que Riale (ZQSD/WASD/Flèches + Shift sprint)
-- Mêmes tailles que Riale (scale 0.75, cellules 768×448)
+- Mêmes tailles que Riale (scale 0.5, cellules 768×448)
 - Même shader PBR que Riale (normales + outline)
 - Sources run : down, down-right, right, up-right, up → mirror pour left, down_left, up_left
+- Pas de système de santé (pas de HeartDisplay) — seulement stamina
 
 ## Sources Art
-- `Riale/anim/` — animations Riale (Walk, run, Idle, combat/)
-- `Ouda/anim/` — animations Ouda (Idle/, Walk/)
+- `Riale/anim/` — animations Riale (Walk, run, Idle, combat/, death/, pick up/, push/, climb up/, swim/, taken_damage/)
+- `Ouda/anim/` — animations Ouda (Idle/, Walk/, run/)
+
+## Systèmes ajoutés
+
+### Eau / Nage
+- `water_zone.tscn` + `water_zone.gd` — Area2D détecte le joueur via body_entered/body_exited
+- Lac de 24 cellules en donut (centre vide pour le spawn joueur)
+- `water_tile.gd` — Sprite2D animé avec water_spritesheet.png (16 frames, 130×130)
+- Entrée → SWIM state (20px/s, 8 directions, animation bouclante)
+- Sortie → retour IDLE ou COMBAT_IDLE
+- `_water_count` gère les chevauchements de zones
+
+### Escalade (Corniches)
+- `climbable_ledge.tscn` + `climbable_ledge.gd` — Area2D, climb_offset/width, label "[E] Climb"
+- 6 corniches placées aléatoirement
+- CLIMB_HANG : looping 4 frames, déplacement horizontal limité à climb_width
+- CLIMB_UP : one-shot 29 frames, téléportation via climb_offset
+
+### Dégâts / Mort
+- `health.gd` : signaux `died` + `damage_taken(amount)`
+- TAKEN_DAMAGE : animation one-shot 29 frames, retour IDLE/COMBAT_IDLE
+- DEATH : prioritaire, animation one-shot, retour IDLE (respawn simple)
+
+### Interactions (touche E, rayon 80px)
+1. Pickup (groupe "pickup") → objet détruit
+2. Pushable (groupe "pushable") → bloc poussé
+3. Climbable (groupe "climbable") → escalade
