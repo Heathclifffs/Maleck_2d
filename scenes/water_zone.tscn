@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://d0ikd3vr8q5n"]
+
+[ext_resource type="Script" path="res://scripts/water_zone.gd" id="1_ay23c"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+
+[node name="WaterZone" type="Node2D"]
+script = ExtResource("1_ay23c")
+
+[node name="Area2D" type="Area2D" parent="."]
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("1")
